@@ -4,7 +4,7 @@ const path = require('path');
 
 const PORT = 3000;
 const os = require('os');
-const DB_FILE = process.env.VERCEL ? path.join(os.tmpdir(), 'database.json') : path.join(__dirname, 'database.json');
+const DB_FILE = process.env.VERCEL ? path.join(os.tmpdir(), 'database.json') : path.join(__dirname, '..', 'database.json');
 
 // Initialize local JSON Database if not exists
 function readDB() {
@@ -301,9 +301,9 @@ const server = http.createServer(async (req, res) => {
   }
 
   // ==========================================================================
-  // STATIC FILES SERVING (FRONTEND)
+  // STATIC FILES SERVING (FRONTEND) - Fallback for local dev
   // ==========================================================================
-  let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
+  let filePath = path.join(__dirname, '..', pathname === '/' ? 'index.html' : pathname);
   
   // Content type mapping
   const extname = path.extname(filePath);
