@@ -1,0 +1,1987 @@
+/**
+ * MindFlow - Student Well-being Companion (Core JS)
+ * Fully offline, highly responsive, browser-native client logic.
+ */
+
+// ==========================================================================
+// 1. Initial State & Seeds
+// ==========================================================================
+const DEFAULT_LOGS = [
+  { date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), mood: "Calm", triggers: ["Time Crunch"], journal: "Finished revising kinematics. Feeling reasonably steady." },
+  { date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), mood: "Stressed", triggers: ["Mock Results", "Syllabus Backlog"], journal: "Got a low score on chemistry mock test. Backlog feels huge and intimidating." },
+  { date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), mood: "Anxious", triggers: ["Family Expectations"], journal: "Talked to parents about preparation. I know they mean well, but the expectation pressure is high." },
+  { date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), mood: "Calm", triggers: ["Sleep Deprived"], journal: "Decided to sleep 8 hours last night. Felt much more relaxed today, was able to concentrate better." },
+  { date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), mood: "Burnt-Out", triggers: ["Syllabus Backlog", "Time Crunch"], journal: "Studied 12 hours straight yesterday. My brain is fried today. Can't absorb a single word of coordinate geometry." },
+  { date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), mood: "Joyful", triggers: ["Physical Health"], journal: "Went out for a 20-minute run. Cleared my head. Ready to tackle physics errors." }
+];
+
+const JOURNAL_PROMPTS = [
+  "What chapter or topic is weighing heaviest on your chest right now? Let's dump it here.",
+  "Describe one micro-achievement you did today (even if it was just sitting down to study).",
+  "If your best friend was facing the exact same mock test results, what reassurance would you tell them?",
+  "Write down the physical sensations of your stress. Are your shoulders tense? Is your breathing shallow?",
+  "What is one thing you are looking forward to doing once this exam season is finally behind you?",
+  "Reflect on a previous difficult topic that you eventually mastered. Remind yourself how you did it."
+];
+
+const EXAM_RESOURCES = {
+  JEE: [
+    { emoji: "🧮", title: "Coping with Mock Test Percentile Dips", text: "JEE mock tests are intentionally designed to be tougher. Treat errors as revision clues rather than intelligence ratings. Log your mistakes in a 'mistake notebook' and focus only on converting them." },
+    { emoji: "⚛️", title: "Physics Formulation Panic Plan", text: "When formulas jumble up, stop solving complex problems. Spend 15 minutes mapping related concepts on a blank canvas. Visualizing the origin of the formula helps anchor memory." },
+    { emoji: "🧪", title: "Organic Chemistry Overwhelm", text: "Don't try to memorize hundreds of reactions at once. Pick just 3 mechanisms daily, write them out manually, and explain them aloud. Action cures backlog anxiety." }
+  ],
+  NEET: [
+    { emoji: "🧬", title: "Biology Memory Fatigue Hacks", text: "With massive NCERT content, syllabus fatigue is normal. Use active recall: cover a page, and try to sketch the diagram from memory. Drawing activates spatial retention." },
+    { emoji: "⚡", title: "Physics Calculation Blockers", text: "Physics anxiety is common for NEET aspirants. Focus on dimensional analysis first. Often, matching units eliminates two options, reducing performance stress in MCQs." },
+    { emoji: "🩺", title: "Managing the Speed-Accuracy Balance", text: "A 200-minute time constraint creates rush anxiety. Practice pacing yourself using 20-minute blocks (solving 15 biology questions calmly) instead of 3-hour long endurance tests." }
+  ],
+  UPSC: [
+    { emoji: "📰", title: "Handling the Current Affairs Deluge", text: "The news cycle is infinite; your brain is not. Limit newspaper reading to a strict 90 minutes. If you miss a day, trust monthly compilations. Avoid FOMO (Fear of Missing Out)." },
+    { emoji: "✍️", title: "Mains Answer Writing Burnout", text: "Blank page syndrome is normal. Do not wait to finish the syllabus to write answers. Write poorly, write bullet points, but write. Perfect is the enemy of done." },
+    { emoji: "🕯️", title: "Isolation and Long-Term Pacing", text: "UPSC is a marathon. Schedule one social interaction daily—whether a phone call or walking in the park. Absolute isolation increases self-doubt." }
+  ],
+  Board: [
+    { emoji: "📝", title: "Subjective Presentation Anxiety", text: "Unlike competitive MCQs, boards reward clarity. Practice writing clean, spaced answers with underlined keywords. Knowing how to present gives an immediate sense of control." },
+    { emoji: "👨‍👩‍👧", title: "Family Expectations Shield", text: "Parents often show anxiety because they care. Have a calm conversation: 'I am working hard, but I need some quiet support rather than constant score checks.'" },
+    { emoji: "🏫", title: "Balancing Boards with Entrance Exams", text: "Do not let boards and entrance battle for your time. Remember: Board concepts are the foundation. Strengthening board theory directly assists MCQ concepts." }
+  ],
+  CAT: [
+    { emoji: "📈", title: "Data Interpretation Panic", text: "When a set looks impossible, remember: you do not need to solve all sets to score high. Pacing yourself to select the solvable set is the core skill. Spend 3 minutes analyzing, then decide." },
+    { emoji: "🗣️", title: "Sectional Cut-off Pressure", text: "A bad VARC section can ruin focus for DILR. Train yourself to hit 'reset' in the 10-second section break. Take a deep sigh and treat the next section as a brand new test." }
+  ],
+  GATE: [
+    { emoji: "💻", title: "Balancing Work/College with Prep", text: "Studying alongside work or final year is stressful. Focus on high-weightage topics (Maths & General Aptitude constitute ~28 marks). Quality over raw hours." },
+    { emoji: "⚙️", title: "Virtual Calculator Clumsiness", text: "Using a virtual mouse-calculator is frustrating. Practice calculation routines daily to build muscle memory and avoid exam-room irritation." }
+  ],
+  CUET: [
+    { emoji: "🖥️", title: "First-Time CBT Interface Nerves", text: "Computer-based testing can feel alien. Take at least 3 official mock tests to get used to the palette, skipping questions, and marking for review." },
+    { emoji: "📚", title: "Domain Juggling Strategy", text: "Juggling 4-5 domains creates task-switching stress. Keep study blocks distinct. Do not study History and Maths in the same continuous sitting; take a break between." }
+  ]
+};
+
+// State Store
+const state = {
+  logs: [],
+  examTarget: "JEE",
+  selectedMood: "",
+  selectedTriggers: [],
+  activePromptIndex: 0,
+  streak: 0,
+  userProfile: null
+};
+
+// ==========================================================================
+// 2. Core Initializer
+// ==========================================================================
+document.addEventListener("DOMContentLoaded", async () => {
+  initLocalStorage();
+  setupNavigation();
+  setupEventListeners();
+  updateWelcomeSection();
+  updateExamAdvice();
+  await syncUserDataFromServer();
+  renderCharts();
+  shufflePrompt();
+});
+
+// Load/Init LocalStorage User Profile details
+function initLocalStorage() {
+  const savedProfile = localStorage.getItem("mindflow_user_profile");
+  const loginPortal = document.getElementById("login-portal");
+
+  if (savedProfile) {
+    state.userProfile = JSON.parse(savedProfile);
+    state.examTarget = state.userProfile.exam;
+    
+    // Hide login gateway
+    if (loginPortal) loginPortal.classList.remove("active");
+    
+    // Update top header select box
+    const selector = document.getElementById("exam-selector");
+    if (selector) selector.value = state.examTarget;
+  } else {
+    // Show login gateway
+    if (loginPortal) loginPortal.classList.add("active");
+  }
+
+  // Load log data from local cache first (server sync runs subsequently in DOMContentLoaded)
+  const phone = state.userProfile ? state.userProfile.phone : 'guest';
+  const savedLogs = localStorage.getItem("mindflow_logs_" + phone) || localStorage.getItem("mindflow_logs");
+  if (savedLogs) {
+    state.logs = JSON.parse(savedLogs);
+  } else {
+    state.logs = [...DEFAULT_LOGS];
+    localStorage.setItem("mindflow_logs_" + phone, JSON.stringify(state.logs));
+  }
+
+  calculateStreak();
+}
+
+// ==========================================================================
+// 2.5 Client-Server Sync Engine (Vercel & Local API Handlers)
+// ==========================================================================
+async function syncUserDataFromServer() {
+  if (!state.userProfile || state.userProfile.isAnonymous) {
+    // Skip backend calls for anonymous/incognito profile
+    calculateStreak();
+    renderAdminAlerts();
+    initDemotivatorsData();
+    return;
+  }
+  
+  const phone = state.userProfile.phone;
+  const isLocalOrVercel = window.location.origin.includes('localhost') || 
+                          window.location.origin.includes('127.0.0.1') || 
+                          window.location.origin.includes('vercel.app');
+
+  if (isLocalOrVercel) {
+    try {
+      // 1. Fetch Logs
+      const resLogs = await fetch(`/api/logs?phone=${phone}`);
+      if (resLogs.ok) {
+        state.logs = await resLogs.json();
+        localStorage.setItem("mindflow_logs_" + phone, JSON.stringify(state.logs));
+      }
+
+      // 2. Fetch Errors
+      const resErrors = await fetch(`/api/errors?phone=${phone}`);
+      if (resErrors.ok) {
+        const errors = await resErrors.json();
+        localStorage.setItem("mindflow_mock_errors", JSON.stringify(errors));
+      }
+
+      // 3. Fetch Checklists
+      const resChecklists = await fetch(`/api/checklists?phone=${phone}`);
+      if (resChecklists.ok) {
+        const data = await resChecklists.json();
+        if (data.wins) localStorage.setItem("mindflow_tiny_wins", JSON.stringify(data.wins));
+        if (data.oaths) localStorage.setItem("mindflow_oath_checks", JSON.stringify(data.oaths));
+        if (data.stretches) localStorage.setItem("mindflow_stretch_checks", JSON.stringify(data.stretches));
+      }
+      
+      console.log("[SERVER SYNC] Data synchronized successfully from server.");
+    } catch (e) {
+      console.warn("[SERVER SYNC FAILED] Running in offline local mode.", e);
+    }
+  }
+
+  // Reload lists into UI
+  calculateStreak();
+  renderAdminAlerts();
+  initDemotivatorsData();
+}
+
+function syncMockErrorsToServer(errors) {
+  if (!state.userProfile || state.userProfile.isAnonymous) return;
+  const phone = state.userProfile.phone;
+  fetch('/api/errors', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone, errors })
+  }).catch(e => console.warn("[OFFLINE WRITE] Error logged locally.", e));
+}
+
+function syncChecklistsToServer(type, data) {
+  if (!state.userProfile || state.userProfile.isAnonymous) return;
+  const phone = state.userProfile.phone;
+  fetch('/api/checklists', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone, type, data })
+  }).catch(e => console.warn("[OFFLINE WRITE] Checklist saved locally.", e));
+}
+
+
+function calculateStreak() {
+  if (state.logs.length === 0) {
+    state.streak = 0;
+    return;
+  }
+  
+  // Sort logs by date descending
+  const sortedLogs = [...state.logs].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  let currentStreak = 0;
+  let today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  let expectedDate = new Date(today);
+  
+  for (let i = 0; i < sortedLogs.length; i++) {
+    const logDate = new Date(sortedLogs[i].date);
+    logDate.setHours(0, 0, 0, 0);
+    
+    // Check if the log is on the expected date or the day before (grace period)
+    const diffTime = expectedDate.getTime() - logDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      currentStreak++;
+      expectedDate.setDate(expectedDate.getDate() - 1);
+    } else if (diffDays === 1) {
+      // User missed today but logged yesterday (streak continues from yesterday)
+      if (i === 0) {
+        currentStreak++;
+        expectedDate.setDate(expectedDate.getDate() - 2);
+      } else {
+        break;
+      }
+    } else if (diffDays > 1) {
+      break;
+    }
+  }
+  
+  state.streak = currentStreak;
+  document.getElementById("stat-streak").innerText = `${state.streak} ${state.streak === 1 ? 'Day' : 'Days'}`;
+}
+
+// ==========================================================================
+// 3. UI Navigation & Helpers
+// ==========================================================================
+function setupNavigation() {
+  const navItems = document.querySelectorAll(".nav-item");
+  const mobileNavItems = document.querySelectorAll(".mobile-nav-item");
+  const panels = document.querySelectorAll(".view-panel");
+
+  function switchTab(tabId) {
+    // Update Desktop Sidebar active states
+    navItems.forEach(item => {
+      if (item.getAttribute("data-tab") === tabId) {
+        item.classList.add("active");
+      } else {
+        item.classList.remove("active");
+      }
+    });
+
+    // Update Mobile Nav active states
+    mobileNavItems.forEach(item => {
+      if (item.getAttribute("data-tab") === tabId) {
+        item.classList.add("active");
+      } else {
+        item.classList.remove("active");
+      }
+    });
+
+    // Update Active View Panel
+    panels.forEach(panel => {
+      if (panel.id === `${tabId}-view`) {
+        panel.classList.add("active");
+      } else {
+        panel.classList.remove("active");
+      }
+    });
+
+    // Refresh profile details on daily reset tab switch
+    if (tabId === "journal") {
+      updateWelcomeSection();
+    }
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener("click", () => switchTab(item.getAttribute("data-tab")));
+  });
+
+  mobileNavItems.forEach(item => {
+    item.addEventListener("click", () => switchTab(item.getAttribute("data-tab")));
+  });
+
+  // Quick jump dashboard links
+  const btnQuickBreathe = document.getElementById("btn-quick-breathe");
+  if (btnQuickBreathe) {
+    btnQuickBreathe.addEventListener("click", () => {
+      switchTab("toolkit");
+      // Auto click start breathe
+      setTimeout(() => {
+        const btn = document.getElementById("btn-breathing-toggle");
+        if (btn && btn.innerText === "Start Breathing") btn.click();
+      }, 100);
+    });
+  }
+
+  const btnQuickGround = document.getElementById("btn-quick-ground");
+  if (btnQuickGround) {
+    btnQuickGround.addEventListener("click", () => {
+      switchTab("toolkit");
+      // Scroll down to grounding container
+      setTimeout(() => {
+        document.querySelector(".grounding-box")?.scrollIntoView({ behavior: 'smooth' });
+      }, 200);
+    });
+  }
+}
+
+function updateWelcomeSection() {
+  // Set Date
+  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById("current-date-str").innerText = new Date().toLocaleDateString('en-US', dateOptions);
+
+  // Set greeting based on time of day
+  const hours = new Date().getHours();
+  let greet = "Hello, Student Companion";
+  if (hours < 12) greet = "Good Morning, Companion";
+  else if (hours < 17) greet = "Good Afternoon, Companion";
+  else greet = "Good Evening, Companion";
+  document.getElementById("welcome-message").innerText = greet;
+
+  // Set sidebar avatar initials & user profile info
+  const exam = state.examTarget;
+  document.getElementById("user-exam-tag").innerText = `Target: ${exam}`;
+  document.getElementById("user-avatar-char").innerText = exam.charAt(0);
+
+  // Calc metrics values
+  if (state.logs.length > 0) {
+    // Mood index (avg score)
+    const moodScores = { "Joyful": 5, "Calm": 4, "Anxious": 3, "Stressed": 2, "Burnt-Out": 1 };
+    let totalScore = 0;
+    state.logs.forEach(l => {
+      totalScore += moodScores[l.mood] || 3;
+    });
+    const avgScore = (totalScore / state.logs.length).toFixed(1);
+    
+    let emoji = "😐";
+    if (avgScore >= 4.5) emoji = "🤩";
+    else if (avgScore >= 3.5) emoji = "😌";
+    else if (avgScore >= 2.5) emoji = "😟";
+    else if (avgScore >= 1.5) emoji = "😫";
+    else emoji = "🥀";
+    
+    document.getElementById("stat-mood-index").innerText = `${avgScore} / 5 ${emoji}`;
+
+    // Calc primary stress trigger
+    const triggersCount = {};
+    state.logs.forEach(l => {
+      if (l.triggers) {
+        l.triggers.forEach(t => {
+          triggersCount[t] = (triggersCount[t] || 0) + 1;
+        });
+      }
+    });
+
+    let topTrigger = "None";
+    let maxCount = 0;
+    for (const [trig, count] of Object.entries(triggersCount)) {
+      if (count > maxCount) {
+        maxCount = count;
+        topTrigger = trig;
+      }
+    }
+    document.getElementById("stat-stress-trigger").innerText = topTrigger;
+
+    // Show recent insight in placeholder card
+    const lastLog = [...state.logs].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    if (lastLog && lastLog.journal) {
+      const placeholder = document.getElementById("insight-placeholder-text");
+      if (placeholder) {
+        placeholder.innerText = `"${lastLog.journal.substring(0, 150)}${lastLog.journal.length > 150 ? '...' : ''}"`;
+      }
+      const indicator = document.getElementById("insight-sentiment-indicator");
+      if (indicator) {
+        indicator.classList.remove("hidden");
+        // Seed sentiment output in card
+        const responseText = analyzeSentimentLocal(lastLog.journal);
+        indicator.innerHTML = `<span>🌱 Focus Advice: ${responseText.substring(0, 75)}...</span>`;
+      }
+    }
+  } else {
+    document.getElementById("stat-mood-index").innerText = "--";
+    document.getElementById("stat-stress-trigger").innerText = "None";
+  }
+}
+
+// Update exam guidance blocks based on selection
+function updateExamAdvice() {
+  const exam = state.examTarget;
+  document.getElementById("exam-card-title-name").innerText = exam;
+  
+  const container = document.getElementById("exam-specific-advice-container");
+  container.innerHTML = ""; // Clear
+  
+  const resources = EXAM_RESOURCES[exam] || EXAM_RESOURCES["JEE"];
+  resources.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "advice-item";
+    div.innerHTML = `
+      <div class="advice-bullet">${item.emoji}</div>
+      <div class="advice-body">
+        <span class="advice-heading">${item.title}</span>
+        <span class="advice-text">${item.text}</span>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ==========================================================================
+// 4. Interactive Logging Panel (Sentiment Engine)
+// ==========================================================================
+function shufflePrompt() {
+  const index = Math.floor(Math.random() * JOURNAL_PROMPTS.length);
+  state.activePromptIndex = index;
+  document.getElementById("active-journal-prompt").innerText = JOURNAL_PROMPTS[index];
+}
+
+// Client-side regex-based sentiment analysis
+function analyzeSentimentLocal(text) {
+  const lower = text.toLowerCase();
+  
+  // Keyword mappings
+  const keywords = {
+    backlog: ["syllabus", "backlog", "incomplete", "chapters", "missed", "delayed", "chemistry", "physics", "maths", "syllabus overload"],
+    test: ["mock", "results", "marks", "score", "percentile", "rank", "failed", "low score", "test", "mistakes"],
+    expectation: ["parents", "family", "father", "mother", "expectations", "peer", "friends", "comparison", "relatives", "pressures"],
+    panic: ["scared", "panicky", "panic", "anxious", "anxiety", "shaking", "fear", "fail", "crying", "hopeless"],
+    fatigue: ["tired", "exhausted", "sleep", "sleepy", "burnout", "burnt out", "energy", "insomnia", "no energy"],
+    anger: ["angry", "hate", "mad", "unfair", "cheated", "annoyed", "pissed", "frustrated", "screwed", "worst", "waste", "irritated"],
+    depression: ["lonely", "sad", "depressed", "failure", "crying", "useless", "give up", "nothing works", "no hope", "dark", "worthless", "hurt", "cried", "giving up"]
+  };
+
+  // Check matching categories
+  let category = "";
+  for (const [cat, words] of Object.entries(keywords)) {
+    if (words.some(word => lower.includes(word))) {
+      category = cat;
+      break;
+    }
+  }
+
+  // Affirmations library based on match
+  switch (category) {
+    case "backlog":
+      return "Syllabus anxiety is normal. Try to list exactly three key subtopics you want to finish tomorrow. Ignore the overall mountain. You build retention block-by-block, not in single giant leaps.";
+    case "test":
+      return "Mock scores are diagnostics tools, not exam results. A mistake made in June is a mistake saved in the real test. Analyze why you got it wrong (was it speed, concept, or silly error?) and catalog it.";
+    case "expectation":
+      return "Their expectations arise from concern, but your focus must remain on your actions. Create a boundary. Remind yourself: 'My worth is independent of their worries.' Focus only on your desk.";
+    case "panic":
+      return "Your anxiety is an alarm bell running high. Try our breathing toolkit. Slowing down your exhale (exhale longer than inhale) signals safety to your heart rate. One hour at a time, you've got this.";
+    case "fatigue":
+      return "Memory retention drops by 40% when sleep-deprived. Sleep is not lost study time; it is active information consolidation. Take a step back and schedule 7 hours of rest. You will study twice as fast tomorrow.";
+    case "anger":
+      return "It is completely valid to feel angry and frustrated. Exam preparation puts you in a high-pressure box, and sometimes it feels incredibly unfair. Vent it all out. Anger is energy—once you let it release on the screen, try our Mind Melt tool to physically dissolve it.";
+    case "depression":
+      return "I hear how heavy and dark things feel right now, and I am so glad you wrote it down. When you feel hopeless or believe you are a failure, please remember: your brain is exhausted, and exhaustion distorts reality. You do not have to carry all this weight. Try the Cozy Corner breathing exercise for just one minute—no goals, no studying, just breathing.";
+    default:
+      return "Thank you for reflecting. Writing it down removes it from your mental loop. You are putting in real effort, and showing up is 80% of the battle. Keep breathing and trust the process.";
+  }
+}
+
+// ==========================================================================
+// 5. Canvas Custom Charts (Zero-Dependency Glowing UI Graphs)
+// ==========================================================================
+function renderCharts() {
+  renderMoodTrendChart();
+  renderTriggerChart();
+}
+
+function renderMoodTrendChart() {
+  const canvas = document.getElementById("mood-trend-canvas");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  
+  // Set dimensions correctly (accounting for high DPI displays)
+  const rect = canvas.parentNode.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Take the last 7 entries
+  const sortedLogs = [...state.logs]
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(-7);
+
+  if (sortedLogs.length === 0) {
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "14px Outfit";
+    ctx.textAlign = "center";
+    ctx.fillText("No mood logs logged yet. Create your first entry!", canvas.width / 2, canvas.height / 2);
+    return;
+  }
+
+  const moodValues = { "Burnt-Out": 1, "Stressed": 2, "Anxious": 3, "Calm": 4, "Joyful": 5 };
+  const moodColors = { "Burnt-Out": "#f43f5e", "Stressed": "#8b5cf6", "Anxious": "#f59e0b", "Calm": "#06b6d4", "Joyful": "#10b981" };
+
+  const padding = { top: 30, right: 30, bottom: 45, left: 50 };
+  const graphWidth = canvas.width - padding.left - padding.right;
+  const graphHeight = canvas.height - padding.top - padding.bottom;
+
+  // Draw Grid Lines & Labels
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+  ctx.lineWidth = 1;
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "10px Outfit";
+  ctx.textAlign = "right";
+
+  const moods = ["🥀", "😫", "😟", "😌", "🤩"];
+  const moodNames = ["Burnt-out", "Stressed", "Anxious", "Calm", "Joyful"];
+
+  for (let i = 0; i < 5; i++) {
+    const y = padding.top + (graphHeight * (4 - i) / 4);
+    ctx.beginPath();
+    ctx.moveTo(padding.left, y);
+    ctx.lineTo(canvas.width - padding.right, y);
+    ctx.stroke();
+    
+    // Draw Y axis label
+    ctx.fillText(`${moods[i]} ${moodNames[i]}`, padding.left - 10, y + 3);
+  }
+
+  // Calculate coordinates for points
+  const points = [];
+  sortedLogs.forEach((log, idx) => {
+    const x = padding.left + (graphWidth * idx / Math.max(1, sortedLogs.length - 1));
+    const score = moodValues[log.mood] || 3;
+    const y = padding.top + (graphHeight * (5 - score) / 4);
+    points.push({ x, y, mood: log.mood, date: new Date(log.date) });
+  });
+
+  // Draw Gradient Fill under line
+  if (points.length > 1) {
+    const gradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + graphHeight);
+    gradient.addColorStop(0, "rgba(139, 92, 246, 0.25)");
+    gradient.addColorStop(1, "rgba(6, 182, 212, 0.0)");
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, padding.top + graphHeight);
+    points.forEach(pt => ctx.lineTo(pt.x, pt.y));
+    ctx.lineTo(points[points.length - 1].x, padding.top + graphHeight);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Draw Connecting Line
+  ctx.strokeStyle = "#8b5cf6";
+  ctx.lineWidth = 3.5;
+  ctx.shadowColor = "rgba(139, 92, 246, 0.5)";
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  points.forEach((pt, idx) => {
+    if (idx === 0) ctx.moveTo(pt.x, pt.y);
+    else ctx.lineTo(pt.x, pt.y);
+  });
+  ctx.stroke();
+  ctx.shadowBlur = 0; // Reset shadow
+
+  // Draw Points & X-Labels
+  points.forEach((pt) => {
+    // Glow circle
+    ctx.fillStyle = moodColors[pt.mood] || "#8b5cf6";
+    ctx.strokeStyle = "#0a0814";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, 6.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // X axis date labels
+    ctx.fillStyle = "#64748b";
+    ctx.font = "10px Outfit";
+    ctx.textAlign = "center";
+    const dayStr = pt.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    ctx.fillText(dayStr, pt.x, padding.top + graphHeight + 20);
+  });
+}
+
+function renderTriggerChart() {
+  const canvas = document.getElementById("trigger-chart-canvas");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  
+  // Set dimensions correctly (accounting for high DPI displays)
+  const rect = canvas.parentNode.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Collect and count triggers from last 15 logs
+  const triggersCount = {};
+  const recentLogs = [...state.logs].slice(-15);
+  
+  recentLogs.forEach(l => {
+    if (l.triggers) {
+      l.triggers.forEach(t => {
+        triggersCount[t] = (triggersCount[t] || 0) + 1;
+      });
+    }
+  });
+
+  const triggerData = Object.entries(triggersCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5); // top 5 triggers
+
+  if (triggerData.length === 0) {
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "14px Outfit";
+    ctx.textAlign = "center";
+    ctx.fillText("No stress triggers mapped yet.", canvas.width / 2, canvas.height / 2);
+    return;
+  }
+
+  const padding = { top: 20, right: 30, bottom: 20, left: 110 };
+  const graphWidth = canvas.width - padding.left - padding.right;
+  const graphHeight = canvas.height - padding.top - padding.bottom;
+
+  const barHeight = Math.min(24, graphHeight / (triggerData.length * 1.5));
+  const maxVal = Math.max(...triggerData.map(d => d[1]));
+
+  triggerData.forEach((data, idx) => {
+    const triggerName = data[0];
+    const count = data[1];
+
+    const y = padding.top + (graphHeight * idx / triggerData.length) + (barHeight / 2);
+    
+    // Label Y-Axis
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "11px Outfit";
+    ctx.textAlign = "right";
+    ctx.fillText(triggerName, padding.left - 12, y + (barHeight / 2) - 1);
+
+    // Draw Bar Background slot
+    ctx.fillStyle = "rgba(255, 255, 255, 0.02)";
+    ctx.fillRect(padding.left, y, graphWidth, barHeight);
+
+    // Draw Glowing Bar Fill
+    const barWidth = (count / maxVal) * graphWidth;
+    const gradient = ctx.createLinearGradient(padding.left, 0, padding.left + barWidth, 0);
+    gradient.addColorStop(0, "#06b6d4");
+    gradient.addColorStop(1, "#8b5cf6");
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(padding.left, y, barWidth, barHeight);
+
+    // Draw bar value marker
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "10px Outfit";
+    ctx.textAlign = "left";
+    ctx.fillText(`${count}x`, padding.left + barWidth + 8, y + (barHeight / 2) - 1);
+  });
+}
+
+// ==========================================================================
+// 6. Audio Synthesizer (Binaural, Rain, Brown Noise via Web Audio)
+// ==========================================================================
+let audioCtx = null;
+let activeSoundNodes = {};
+let masterGain = null;
+
+function initAudio() {
+  if (audioCtx) return;
+  
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  
+  // Connect master volume to destination
+  const slider = document.getElementById("ambient-volume");
+  masterGain.gain.setValueAtTime(slider.value, audioCtx.currentTime);
+  masterGain.connect(audioCtx.destination);
+}
+
+function startRainNode() {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  
+  for (let i = 0; i < bufferSize; i++) {
+    output[i] = Math.random() * 2 - 1;
+  }
+  
+  const whiteNoise = audioCtx.createBufferSource();
+  whiteNoise.buffer = noiseBuffer;
+  whiteNoise.loop = true;
+  
+  // Rain filter
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(750, audioCtx.currentTime);
+  
+  // Rain amplitude envelope modulation
+  const modGain = audioCtx.createGain();
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+  
+  lfo.frequency.setValueAtTime(0.15, audioCtx.currentTime); // slow wave gust
+  lfoGain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+  
+  lfo.connect(lfoGain);
+  lfoGain.connect(modGain.gain);
+  
+  whiteNoise.connect(filter);
+  filter.connect(modGain);
+  modGain.connect(masterGain);
+  
+  whiteNoise.start();
+  lfo.start();
+  
+  activeSoundNodes.rain = {
+    source: whiteNoise,
+    lfo: lfo,
+    gainNode: modGain
+  };
+}
+
+function stopRainNode() {
+  if (activeSoundNodes.rain) {
+    try {
+      activeSoundNodes.rain.source.stop();
+      activeSoundNodes.rain.lfo.stop();
+    } catch(e) {}
+    delete activeSoundNodes.rain;
+  }
+}
+
+function startBinauralNode() {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  
+  const oscL = audioCtx.createOscillator();
+  const oscR = audioCtx.createOscillator();
+  const merger = audioCtx.createChannelMerger(2);
+  const toneGain = audioCtx.createGain();
+  
+  // 140Hz Carrier (left) vs 150Hz Carrier (right) -> 10Hz Alpha differential
+  oscL.type = 'sine';
+  oscR.type = 'sine';
+  oscL.frequency.setValueAtTime(140, audioCtx.currentTime);
+  oscR.frequency.setValueAtTime(150, audioCtx.currentTime);
+  
+  toneGain.gain.setValueAtTime(0.12, audioCtx.currentTime); // Soft background wave
+  
+  oscL.connect(merger, 0, 0);
+  oscR.connect(merger, 0, 1);
+  merger.connect(toneGain);
+  toneGain.connect(masterGain);
+  
+  oscL.start();
+  oscR.start();
+  
+  activeSoundNodes.binaural = {
+    oscL: oscL,
+    oscR: oscR,
+    gainNode: toneGain
+  };
+}
+
+function stopBinauralNode() {
+  if (activeSoundNodes.binaural) {
+    try {
+      activeSoundNodes.binaural.oscL.stop();
+      activeSoundNodes.binaural.oscR.stop();
+    } catch(e) {}
+    delete activeSoundNodes.binaural;
+  }
+}
+
+function startBrownNode() {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  
+  let lastOut = 0.0;
+  for (let i = 0; i < bufferSize; i++) {
+    const white = Math.random() * 2 - 1;
+    // Brownian integration formula
+    output[i] = (lastOut + (0.02 * white)) / 1.02;
+    lastOut = output[i];
+    output[i] *= 3.5; // Gain compensation
+  }
+  
+  const brownNoise = audioCtx.createBufferSource();
+  brownNoise.buffer = noiseBuffer;
+  brownNoise.loop = true;
+  
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(450, audioCtx.currentTime); // smooth out high end
+  
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.7, audioCtx.currentTime);
+  
+  brownNoise.connect(filter);
+  filter.connect(gain);
+  gain.connect(masterGain);
+  
+  brownNoise.start();
+  
+  activeSoundNodes.brown = {
+    source: brownNoise,
+    gainNode: gain
+  };
+}
+
+function stopBrownNode() {
+  if (activeSoundNodes.brown) {
+    try {
+      activeSoundNodes.brown.source.stop();
+    } catch(e) {}
+    delete activeSoundNodes.brown;
+  }
+}
+
+function startMelodyNode() {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  
+  const osc1 = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const filter = audioCtx.createBiquadFilter();
+  const gain = audioCtx.createGain();
+  
+  // Ambient deep twilight chord (tuned close to root and slightly detuned fifth)
+  osc1.type = 'sawtooth';
+  osc2.type = 'triangle';
+  osc1.frequency.setValueAtTime(65.41, audioCtx.currentTime); // C2
+  osc2.frequency.setValueAtTime(98.3, audioCtx.currentTime);  // G2 slightly detuned
+  
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(140, audioCtx.currentTime); // filter out buzzing high end, leaving a warm rumble
+  
+  gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+  
+  osc1.connect(filter);
+  osc2.connect(filter);
+  filter.connect(gain);
+  gain.connect(masterGain);
+  
+  osc1.start();
+  osc2.start();
+  
+  activeSoundNodes.melody = {
+    osc1: osc1,
+    osc2: osc2,
+    gainNode: gain
+  };
+}
+
+function stopMelodyNode() {
+  if (activeSoundNodes.melody) {
+    try {
+      activeSoundNodes.melody.osc1.stop();
+      activeSoundNodes.melody.osc2.stop();
+    } catch(e) {}
+    delete activeSoundNodes.melody;
+  }
+}
+
+// Volume controller
+function updateVolume(val) {
+  if (masterGain && audioCtx) {
+    masterGain.gain.setValueAtTime(val, audioCtx.currentTime);
+  }
+}
+
+// Play a single calming bell note when logging/clearing steps
+function playCalmBell() {
+  try {
+    initAudio();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, audioCtx.currentTime); // A4 note
+    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // slight upward slide
+    osc.frequency.exponentialRampToValueAtTime(523.25, audioCtx.currentTime + 0.5); // slide to C5
+    
+    gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2); // decay
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 1.3);
+  } catch(e) {}
+}
+
+// ==========================================================================
+// 7. 4-7-8 Breathing Engine State Machine
+// ==========================================================================
+let breathingInterval = null;
+let breathingState = "stopped"; // stopped, inhaling, holding, exhaling
+let breathingCount = 0;
+let cycleStageTime = 0;
+
+function startBreathing() {
+  const bubble = document.getElementById("breathing-bubble");
+  const ring = document.getElementById("breathing-ring");
+  const phaseText = document.getElementById("breath-phase-text");
+  const timerText = document.getElementById("breath-timer-text");
+  const toggleBtn = document.getElementById("btn-breathing-toggle");
+
+  initAudio();
+  
+  breathingState = "inhaling";
+  cycleStageTime = 4;
+  
+  toggleBtn.innerText = "Pause Session";
+  toggleBtn.style.background = "var(--accent-rose)";
+  
+  ring.className = "breathing-outer-ring inhale";
+  phaseText.innerText = "Inhale";
+  timerText.innerText = `4s`;
+
+  // Play ascending inhale tone
+  playBreathingDrone(300, 400, 4);
+
+  breathingInterval = setInterval(() => {
+    cycleStageTime--;
+    
+    if (cycleStageTime <= 0) {
+      // Transition State Machine
+      if (breathingState === "inhaling") {
+        breathingState = "holding";
+        cycleStageTime = 7;
+        ring.className = "breathing-outer-ring hold";
+        phaseText.innerText = "Hold";
+        playBreathingDrone(400, 400, 7);
+      } else if (breathingState === "holding") {
+        breathingState = "exhaling";
+        cycleStageTime = 8;
+        ring.className = "breathing-outer-ring exhale";
+        phaseText.innerText = "Exhale";
+        playBreathingDrone(400, 250, 8);
+      } else if (breathingState === "exhaling") {
+        breathingState = "inhaling";
+        cycleStageTime = 4;
+        ring.className = "breathing-outer-ring inhale";
+        phaseText.innerText = "Inhale";
+        playBreathingDrone(300, 400, 4);
+      }
+    }
+    
+    timerText.innerText = `${cycleStageTime}s`;
+  }, 1000);
+}
+
+function pauseBreathing() {
+  clearInterval(breathingInterval);
+  breathingInterval = null;
+  breathingState = "stopped";
+  
+  const ring = document.getElementById("breathing-ring");
+  const phaseText = document.getElementById("breath-phase-text");
+  const timerText = document.getElementById("breath-timer-text");
+  const toggleBtn = document.getElementById("btn-breathing-toggle");
+  
+  toggleBtn.innerText = "Resume Session";
+  toggleBtn.style.background = "var(--accent-purple)";
+  ring.className = "breathing-outer-ring";
+  phaseText.innerText = "Paused";
+  timerText.innerText = "Click to Resume";
+}
+
+function resetBreathing() {
+  clearInterval(breathingInterval);
+  breathingInterval = null;
+  breathingState = "stopped";
+  
+  const ring = document.getElementById("breathing-ring");
+  const phaseText = document.getElementById("breath-phase-text");
+  const timerText = document.getElementById("breath-timer-text");
+  const toggleBtn = document.getElementById("btn-breathing-toggle");
+  
+  toggleBtn.innerText = "Start Breathing";
+  toggleBtn.style.background = "linear-gradient(135deg, var(--accent-purple), var(--accent-purple))";
+  ring.className = "breathing-outer-ring";
+  phaseText.innerText = "Ready";
+  timerText.innerText = "Click Start";
+}
+
+// Generate organic guided tones for breathing synchronization
+function playBreathingDrone(startFreq, endFreq, durationSec) {
+  try {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(startFreq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + durationSec);
+    
+    gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 0.5); // fade in
+    gain.gain.setValueAtTime(0.06, audioCtx.currentTime + durationSec - 0.5);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + durationSec); // fade out
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + durationSec);
+  } catch(e) {}
+}
+
+// ==========================================================================
+// 7.5 Crisis Alert Detection & Admin Escalation (Security Controls)
+// ==========================================================================
+const CRISIS_KEYWORDS = [
+  "kill myself", "end my life", "suicide", "want to die", "ending it all", 
+  "don't want to live", "quit life", "cut myself", "better off dead", 
+  "self harm", "harm myself", "no reason to live", "planning to die"
+];
+
+function detectCrisisState(text) {
+  const lower = text.toLowerCase().trim();
+  if (lower.length === 0) return null;
+  return CRISIS_KEYWORDS.find(keyword => lower.includes(keyword)) || null;
+}
+
+function triggerAdminAlarm(timestamp, matchedKeyword, examTarget) {
+  const alerts = JSON.parse(localStorage.getItem("mindflow_admin_alerts") || "[]");
+  const newAlert = {
+    timestamp: timestamp,
+    term: matchedKeyword,
+    exam: examTarget,
+    status: "Urgent Counselor Dispatched"
+  };
+  alerts.unshift(newAlert);
+  localStorage.setItem("mindflow_admin_alerts", JSON.stringify(alerts));
+  renderAdminAlerts();
+  
+  // Simulated POST Request demonstrating API escalation
+  console.warn(`[ALARM SYSTEM] dispatching encrypted crisis payload to: POST https://api.mindflow.wellness/v1/alerts`);
+  fetch('https://httpbin.org/post', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newAlert)
+  }).then(r => console.log('[ALARM RESPONSE] HTTP status 200 - Alert logged successfully in central admin dashboard.'))
+    .catch(e => console.error('[ALARM EXCEPTION]', e));
+}
+
+function renderAdminAlerts() {
+  const container = document.getElementById("admin-alert-log-container");
+  const placeholder = document.getElementById("no-admin-alerts-placeholder");
+  if (!container) return;
+  
+  const alerts = JSON.parse(localStorage.getItem("mindflow_admin_alerts") || "[]");
+  
+  if (alerts.length === 0) {
+    container.innerHTML = "";
+    container.appendChild(placeholder);
+    if (placeholder) placeholder.style.display = "block";
+    return;
+  }
+  
+  if (placeholder) placeholder.style.display = "none";
+  container.innerHTML = "";
+  
+  alerts.forEach(alert => {
+    const div = document.createElement("div");
+    div.style.cssText = "display: flex; justify-content: space-between; padding: 0.65rem 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); color: #fda4af; font-weight: 500; align-items: center;";
+    div.innerHTML = `
+      <span style="color: var(--text-secondary); font-size: 0.75rem;">${alert.timestamp}</span>
+      <span style="color: var(--accent-rose); font-weight: 700;">"${alert.term}"</span>
+      <span style="color: var(--accent-cyan); font-weight: 600;">${alert.exam}</span>
+      <span style="color: #6ed5b1; font-weight: 700; font-size: 0.75rem;">🔴 ${alert.status}</span>
+    `;
+    container.appendChild(div);
+  });
+}
+
+let geminiDebounceTimeout = null;
+
+function triggerGeminiAIAnalysis(text) {
+  const apiKey = localStorage.getItem("mindflow_gemini_key");
+  if (!apiKey) return;
+
+  const liveFeedback = document.getElementById("realtime-sentiment-feedback");
+  const sentimentPreview = document.getElementById("journal-sentiment-preview");
+
+  sentimentPreview.innerText = "Gemini is reflecting...";
+  liveFeedback.innerHTML = `<span style="color: var(--accent-cyan); font-weight: 600; animation: pulseCyan 1.5s infinite;">✨ Gemini is generating a mindful reflection...</span>`;
+
+  const exam = state.examTarget;
+  const prompt = `You are MindFlow, a compassionate, empathetic mental wellness companion for students preparing for high-stakes competitive exams (current target: ${exam}).
+  A student has shared this private journal entry:
+  "${text}"
+  
+  Provide a supportive, validating, and calming response (maximum 3 sentences). Validate their struggles (anger, backlog, mock scores, or loneliness) with deep empathy, and offer one actionable micro-advice (e.g. taking a physiological sigh, writing 3 wins, or planning 50-10 study pacing). Keep the tone warm, soothing, and encouraging. Avoid generic clichés.`;
+
+  fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{ text: prompt }]
+      }]
+    })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("API call failed");
+    return res.json();
+  })
+  .then(data => {
+    const responseText = data.candidates[0].content.parts[0].text.trim();
+    liveFeedback.innerText = responseText;
+    sentimentPreview.innerText = "Gemini AI reflection updated ✨";
+  })
+  .catch(err => {
+    console.error("Gemini API Error:", err);
+    sentimentPreview.innerText = "Local Sentiment Engine (API Fallback) 🌱";
+    liveFeedback.innerText = analyzeSentimentLocal(text);
+  });
+}
+
+// ==========================================================================
+// 7.8 Demotivator Practical Solutions & Persistence
+// ==========================================================================
+function renderMockErrors() {
+  const list = document.getElementById("mock-errors-list");
+  if (!list) return;
+  const errors = JSON.parse(localStorage.getItem("mindflow_mock_errors") || "[]");
+  if (errors.length === 0) {
+    list.innerHTML = `<span style="color: var(--text-muted); font-style: italic; font-size: 0.75rem;">No mock test errors logged yet. List errors to tackle them conceptually!</span>`;
+    return;
+  }
+  list.innerHTML = errors.map((err, index) => `
+    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); padding: 0.4rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.78rem; gap: 0.5rem; margin-bottom: 0.25rem;">
+      <span style="color: var(--text-primary);">
+        <strong style="color: var(--accent-amber); font-weight: 700;">[${err.cause}]</strong> ${err.topic}
+        <span style="font-size: 0.68rem; color: var(--text-muted); margin-left: 0.25rem;">(${err.time})</span>
+      </span>
+      <button class="btn-delete-err" data-index="${index}" style="background: none; border: none; color: var(--accent-rose); cursor: pointer; font-size: 1.1rem; padding: 0 0.2rem; font-weight: 700; line-height: 1;">&times;</button>
+    </div>
+  `).join("");
+  
+  // Add delete listeners
+  list.querySelectorAll(".btn-delete-err").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.getAttribute("data-index"));
+      errors.splice(idx, 1);
+      localStorage.setItem("mindflow_mock_errors", JSON.stringify(errors));
+      renderMockErrors();
+      playCalmBell();
+    });
+  });
+}
+
+function saveWins() {
+  const wins = {};
+  for (let i = 1; i <= 3; i++) {
+    const checkbox = document.getElementById(`win-check-${i}`);
+    const textInput = document.getElementById(`win-text-${i}`);
+    if (checkbox) wins[`check-${i}`] = checkbox.checked;
+    if (textInput) wins[`text-${i}`] = textInput.value;
+  }
+  localStorage.setItem("mindflow_tiny_wins", JSON.stringify(wins));
+}
+
+// Keep stretch checks synced in local storage
+function saveStretches() {
+  const stretches = {};
+  for (let i = 1; i <= 3; i++) {
+    const checkbox = document.getElementById(`stretch-check-${i}`);
+    if (checkbox) stretches[`check-${i}`] = checkbox.checked;
+  }
+  localStorage.setItem("mindflow_stretch_checks", JSON.stringify(stretches));
+}
+
+function saveOaths() {
+  const oaths = {};
+  for (let i = 1; i <= 2; i++) {
+    const checkbox = document.getElementById(`oath-check-${i}`);
+    if (checkbox) oaths[`check-${i}`] = checkbox.checked;
+  }
+  localStorage.setItem("mindflow_oath_checks", JSON.stringify(oaths));
+}
+
+function initDemotivatorsData() {
+  renderMockErrors();
+
+  // Load wins
+  const wins = JSON.parse(localStorage.getItem("mindflow_tiny_wins") || "{}");
+  for (let i = 1; i <= 3; i++) {
+    const checkbox = document.getElementById(`win-check-${i}`);
+    const textInput = document.getElementById(`win-text-${i}`);
+    if (checkbox && wins[`check-${i}`] !== undefined) checkbox.checked = wins[`check-${i}`];
+    if (textInput && wins[`text-${i}`] !== undefined) textInput.value = wins[`text-${i}`];
+  }
+
+  // Load oaths
+  const oaths = JSON.parse(localStorage.getItem("mindflow_oath_checks") || "{}");
+  for (let i = 1; i <= 2; i++) {
+    const checkbox = document.getElementById(`oath-check-${i}`);
+    if (checkbox && oaths[`check-${i}`] !== undefined) checkbox.checked = oaths[`check-${i}`];
+  }
+
+  // Load stretches
+  const stretches = JSON.parse(localStorage.getItem("mindflow_stretch_checks") || "{}");
+  for (let i = 1; i <= 3; i++) {
+    const checkbox = document.getElementById(`stretch-check-${i}`);
+    if (checkbox && stretches[`check-${i}`] !== undefined) checkbox.checked = stretches[`check-${i}`];
+  }
+}
+
+// ==========================================================================
+// 8. Event Listeners Coordination
+// ==========================================================================
+function setupEventListeners() {
+  // Login Submit Listener
+  const loginSubmitBtn = document.getElementById("btn-login-submit");
+  if (loginSubmitBtn) {
+    loginSubmitBtn.addEventListener("click", async () => {
+      const name = document.getElementById("login-name").value.trim();
+      const phone = document.getElementById("login-phone").value.trim();
+      const exam = document.getElementById("login-exam").value;
+      const agree = document.getElementById("login-agree").checked;
+
+      if (!name || !phone || !agree) {
+        alert("Please fill in all details and agree to the privacy terms.");
+        return;
+      }
+      
+      if (!/^[0-9]{10}$/.test(phone)) {
+        alert("Please enter a valid 10-digit mobile number.");
+        return;
+      }
+
+      state.userProfile = {
+        name,
+        phone,
+        exam,
+        isAnonymous: false,
+        createdAt: new Date().toISOString()
+      };
+      
+      state.examTarget = exam;
+      localStorage.setItem("mindflow_user_profile", JSON.stringify(state.userProfile));
+      localStorage.setItem("mindflow_exam", exam);
+      
+      const loginPortal = document.getElementById("login-portal");
+      if (loginPortal) loginPortal.classList.remove("active");
+      
+      const selector = document.getElementById("exam-selector");
+      if (selector) selector.value = state.examTarget;
+      
+      updateWelcomeSection();
+      updateExamAdvice();
+      
+      // Attempt login via API to create/fetch user session
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state.userProfile)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          // Log data from server if exists, else keep default
+          if (data.user && data.user.logs && data.user.logs.length > 0) {
+             state.logs = data.user.logs;
+             localStorage.setItem("mindflow_logs_" + phone, JSON.stringify(state.logs));
+          }
+        }
+      } catch (e) {
+        console.warn("Login API not available, continuing in offline mode.");
+      }
+      
+      await syncUserDataFromServer();
+      renderCharts();
+    });
+  }
+
+  // Login Anonymous Listener
+  const loginAnonBtn = document.getElementById("btn-login-anonymous");
+  if (loginAnonBtn) {
+    loginAnonBtn.addEventListener("click", () => {
+      state.userProfile = {
+        name: "Anonymous User",
+        phone: "anonymous",
+        exam: "JEE", // default
+        isAnonymous: true,
+        createdAt: new Date().toISOString()
+      };
+      
+      state.examTarget = "JEE";
+      localStorage.setItem("mindflow_user_profile", JSON.stringify(state.userProfile));
+      
+      const loginPortal = document.getElementById("login-portal");
+      if (loginPortal) loginPortal.classList.remove("active");
+      
+      updateWelcomeSection();
+      updateExamAdvice();
+      renderCharts();
+    });
+  }
+
+  // Exam Selector Listener
+  const examSelector = document.getElementById("exam-selector");
+  examSelector.addEventListener("change", (e) => {
+    state.examTarget = e.target.value;
+    localStorage.setItem("mindflow_exam", state.examTarget);
+    updateWelcomeSection();
+    updateExamAdvice();
+  });
+
+  // Crisis Modal Event Triggers
+  const crisisTrigger = document.getElementById("btn-crisis-trigger");
+  const crisisModal = document.getElementById("crisis-modal");
+  const crisisClose = document.getElementById("btn-crisis-close");
+
+  crisisTrigger.addEventListener("click", () => crisisModal.classList.add("active"));
+  crisisClose.addEventListener("click", () => crisisModal.classList.remove("active"));
+  crisisModal.addEventListener("click", (e) => {
+    if (e.target === crisisModal) crisisModal.classList.remove("active");
+  });
+
+  // Panic Modal Event Triggers
+  const panicTrigger = document.getElementById("btn-panic-kit-trigger");
+  const panicModal = document.getElementById("panic-modal");
+  const panicClose = document.getElementById("btn-panic-close");
+
+  panicTrigger.addEventListener("click", () => panicModal.classList.add("active"));
+  panicClose.addEventListener("click", () => panicModal.classList.remove("active"));
+  panicModal.addEventListener("click", (e) => {
+    if (e.target === panicModal) panicModal.classList.remove("active");
+  });
+
+  // Mood selector buttons click
+  const moodBtns = document.querySelectorAll(".mood-btn");
+  moodBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      moodBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.selectedMood = btn.getAttribute("data-mood");
+    });
+  });
+
+  // Trigger chips toggle
+  const triggerChips = document.querySelectorAll(".trigger-chip");
+  triggerChips.forEach(chip => {
+    chip.addEventListener("click", () => {
+      chip.classList.toggle("active");
+      const trig = chip.getAttribute("data-trigger");
+      
+      if (chip.classList.contains("active")) {
+        if (!state.selectedTriggers.includes(trig)) {
+          state.selectedTriggers.push(trig);
+        }
+      } else {
+        state.selectedTriggers = state.selectedTriggers.filter(t => t !== trig);
+      }
+    });
+  });
+
+  // Prompt Shuffle Button
+  document.getElementById("btn-prompt-shuffle").addEventListener("click", shufflePrompt);
+
+  // Live Sentiment Journal listener
+  const journalInput = document.getElementById("journal-input");
+  const liveFeedback = document.getElementById("realtime-sentiment-feedback");
+  const sentimentPreview = document.getElementById("journal-sentiment-preview");
+
+  journalInput.addEventListener("input", (e) => {
+    const text = e.target.value;
+    const crisisTerm = detectCrisisState(text);
+    
+    if (geminiDebounceTimeout) clearTimeout(geminiDebounceTimeout);
+    
+    if (crisisTerm) {
+      sentimentPreview.innerHTML = `<span style="color: var(--accent-rose); font-weight: 700;">⚠️ Urgent self-harm alert flagged</span>`;
+      liveFeedback.innerHTML = `<span style="color: #fda4af; font-weight: 700;">We notice you might be experiencing extreme distress. Please write openly, but know that counseling help has been flagged. You do not have to carry this alone.</span>`;
+    } else if (text.trim().length > 6) {
+      sentimentPreview.innerText = "Analyzing vibe...";
+      const affirmation = analyzeSentimentLocal(text);
+      
+      // Animate/Fade feed back text nicely
+      liveFeedback.innerText = affirmation;
+      sentimentPreview.innerText = "Live affirmation updated 🌱";
+
+      const apiKey = localStorage.getItem("mindflow_gemini_key");
+      if (apiKey && text.trim().length > 15) {
+        geminiDebounceTimeout = setTimeout(() => {
+          triggerGeminiAIAnalysis(text);
+        }, 1200);
+      }
+    } else {
+      liveFeedback.innerText = "As you share your thoughts, our local wellness guide will provide custom reassurance to help you manage the load.";
+      sentimentPreview.innerText = "Type to analyze emotional vibe...";
+    }
+  });
+
+  // Save entry submission button
+  document.getElementById("btn-save-log").addEventListener("click", () => {
+    if (!state.selectedMood) {
+      alert("Please select your current mood before logging.");
+      return;
+    }
+
+    const journalContent = journalInput.value.trim();
+    const crisisTerm = detectCrisisState(journalContent);
+    let isCrisis = false;
+
+    if (crisisTerm) {
+      isCrisis = true;
+      const timestamp = new Date().toLocaleTimeString() + " (" + new Date().toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) + ")";
+      triggerAdminAlarm(timestamp, crisisTerm, state.examTarget);
+      
+      const crisisAlertModal = document.getElementById("crisis-alert-modal");
+      if (crisisAlertModal) {
+        crisisAlertModal.classList.add("active");
+      }
+    }
+
+    const newEntry = {
+      date: new Date().toISOString(),
+      mood: state.selectedMood,
+      triggers: [...state.selectedTriggers],
+      journal: journalContent || "No detailed written entry."
+    };
+
+    // Save and Sync
+    state.logs.push(newEntry);
+    localStorage.setItem("mindflow_logs", JSON.stringify(state.logs));
+    
+    playCalmBell();
+    calculateStreak();
+
+    // Reset Form Input fields
+    moodBtns.forEach(b => b.classList.remove("active"));
+    triggerChips.forEach(c => c.classList.remove("active"));
+    journalInput.value = "";
+    state.selectedMood = "";
+    state.selectedTriggers = [];
+    liveFeedback.innerText = "As you share your thoughts, our local wellness guide will provide custom reassurance to help you manage the load.";
+    sentimentPreview.innerText = "Type to analyze emotional vibe...";
+
+    if (!isCrisis) {
+      alert("Well-being log saved successfully! Scroll down to 'My Insights' to view updated trends.");
+      const journalTabLink = document.querySelector(".nav-item[data-tab='journal']");
+      if (journalTabLink) journalTabLink.click();
+    } else {
+      alert("Emergency self-harm signal dispatched to Campus Admin. Please review the support links displayed on your screen.");
+    }
+  });
+
+  // Breathing toggle click
+  const breathingToggleBtn = document.getElementById("btn-breathing-toggle");
+  const breathingResetBtn = document.getElementById("btn-breathing-reset");
+
+  breathingToggleBtn.addEventListener("click", () => {
+    if (breathingState === "stopped") {
+      startBreathing();
+    } else {
+      pauseBreathing();
+    }
+  });
+
+  breathingResetBtn.addEventListener("click", () => {
+    resetBreathing();
+  });
+
+  // Sound Console sliders and cards toggle
+  const soundCards = document.querySelectorAll(".sound-card");
+  const volumeSlider = document.getElementById("ambient-volume");
+
+  soundCards.forEach(card => {
+    card.addEventListener("click", () => {
+      const soundType = card.getAttribute("data-sound");
+      card.classList.toggle("active");
+
+      const isActive = card.classList.contains("active");
+
+      if (soundType === "rain") {
+        if (isActive) startRainNode();
+        else stopRainNode();
+      } else if (soundType === "binaural") {
+        if (isActive) startBinauralNode();
+        else stopBinauralNode();
+      } else if (soundType === "brown") {
+        if (isActive) startBrownNode();
+        else stopBrownNode();
+      } else if (soundType === "melody") {
+        if (isActive) startMelodyNode();
+        else stopMelodyNode();
+      }
+    });
+  });
+
+  volumeSlider.addEventListener("input", (e) => {
+    updateVolume(parseFloat(e.target.value));
+  });
+
+  // Wipe All Data Handler
+  const wipeDataBtn = document.getElementById("btn-wipe-data");
+  if (wipeDataBtn) {
+    wipeDataBtn.addEventListener("click", () => {
+      const confirm1 = confirm("Are you absolutely sure you want to delete all of your logs and reflections? This will clear everything locally on this computer.");
+      if (confirm1) {
+        const confirm2 = confirm("Double checking: This cannot be undone. All history, streaks, and triggers will be permanently deleted. Proceed?");
+        if (confirm2) {
+          // Stop all active synths
+          stopRainNode();
+          stopBinauralNode();
+          stopBrownNode();
+          stopMelodyNode();
+          
+          // Clear active classes in UI for soundcards
+          document.querySelectorAll(".sound-card").forEach(c => c.classList.remove("active"));
+          
+          // Clear local storage
+          localStorage.removeItem("mindflow_logs");
+          localStorage.removeItem("mindflow_admin_alerts");
+          localStorage.removeItem("mindflow_mock_errors");
+          localStorage.removeItem("mindflow_tiny_wins");
+          localStorage.removeItem("mindflow_oath_checks");
+          localStorage.removeItem("mindflow_stretch_checks");
+          localStorage.removeItem("mindflow_gemini_key");
+          state.logs = [];
+          
+          // Clear Gemini status UI
+          const geminiKeyInput = document.getElementById("gemini-key-input");
+          const geminiStatusLabel = document.getElementById("gemini-status-label");
+          if (geminiKeyInput) geminiKeyInput.value = "";
+          if (geminiStatusLabel) {
+            geminiStatusLabel.innerText = "Not connected (falling back to Local Sentiment Engine)";
+            geminiStatusLabel.style.color = "var(--text-muted)";
+          }
+          
+          // Clear UI inputs for demotivators
+          for (let i = 1; i <= 3; i++) {
+            const checkbox = document.getElementById(`win-check-${i}`);
+            const textInput = document.getElementById(`win-text-${i}`);
+            if (checkbox) checkbox.checked = false;
+            if (textInput) textInput.value = "";
+          }
+          for (let i = 1; i <= 2; i++) {
+            const checkbox = document.getElementById(`oath-check-${i}`);
+            if (checkbox) checkbox.checked = false;
+          }
+          for (let i = 1; i <= 3; i++) {
+            const checkbox = document.getElementById(`stretch-check-${i}`);
+            if (checkbox) checkbox.checked = false;
+          }
+          renderMockErrors();
+          
+          // Reset statistics
+          calculateStreak();
+          updateWelcomeSection();
+          renderCharts();
+          renderAdminAlerts();
+          
+          playCalmBell();
+          alert("All personal records have been completely purged from this device. Your privacy remains secure.");
+          
+          // Jump to journal
+          const journalTabLink = document.querySelector(".nav-item[data-tab='journal']");
+          if (journalTabLink) journalTabLink.click();
+        }
+      }
+    });
+  }
+
+  // Close Emergency Self-Harm Alert Modal
+  const crisisAlertModal = document.getElementById("crisis-alert-modal");
+  const crisisAlertClose = document.getElementById("btn-crisis-alert-close");
+  if (crisisAlertClose) {
+    crisisAlertClose.addEventListener("click", () => crisisAlertModal.classList.remove("active"));
+  }
+  if (crisisAlertModal) {
+    crisisAlertModal.addEventListener("click", (e) => {
+      if (e.target === crisisAlertModal) crisisAlertModal.classList.remove("active");
+    });
+  }
+
+  // Insights Accordion Toggle
+  const toggleInsightsBtn = document.getElementById("btn-toggle-insights");
+  const insightsContent = document.getElementById("insights-accordion-content");
+  const accordionArrow = document.getElementById("accordion-arrow");
+
+  if (toggleInsightsBtn && insightsContent) {
+    toggleInsightsBtn.addEventListener("click", () => {
+      const isHidden = insightsContent.style.display === "none";
+      if (isHidden) {
+        insightsContent.style.display = "block";
+        accordionArrow.innerText = "▲ Collapse";
+        // Force Canvas redraw when expanded so width and spacing render perfectly
+        renderCharts();
+      } else {
+        insightsContent.style.display = "none";
+        accordionArrow.innerText = "▼ Expand";
+      }
+    });
+  }
+
+  // SOS Panic Help Button Click Handler
+  const panicSosBtn = document.getElementById("btn-panic-sos");
+  const panicModal = document.getElementById("panic-modal");
+  if (panicSosBtn && panicModal) {
+    panicSosBtn.addEventListener("click", () => {
+      panicModal.classList.add("active");
+    });
+  }
+
+  // Mind Melt Venting Box Action Handler
+  const ventInput = document.getElementById("vent-input");
+  const btnBurnVent = document.getElementById("btn-burn-vent");
+  if (btnBurnVent && ventInput) {
+    btnBurnVent.addEventListener("click", () => {
+      const text = ventInput.value.trim();
+      if (text.length === 0) {
+        alert("The venting area is empty. Pour your frustration or dark thoughts here first so we can burn them!");
+        return;
+      }
+
+      playCalmBell();
+
+      // Trigger melting transition animations (blur out and scale up/down)
+      ventInput.style.transition = "transform 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 1.6s ease-out, opacity 1.6s ease-out";
+      ventInput.style.transform = "scale(0.85) translateY(-25px)";
+      ventInput.style.filter = "blur(14px) grayscale(1)";
+      ventInput.style.opacity = "0";
+
+      btnBurnVent.innerText = "💨 Melting your worries...";
+      btnBurnVent.style.background = "#475569";
+      btnBurnVent.disabled = true;
+
+      setTimeout(() => {
+        ventInput.value = "";
+        ventInput.style.transition = "none";
+        ventInput.style.transform = "none";
+        ventInput.style.filter = "none";
+        ventInput.style.opacity = "1";
+
+        btnBurnVent.innerText = "🔥 Burn & Let It Go";
+        btnBurnVent.style.background = "linear-gradient(135deg, var(--accent-rose), #e11d48)";
+        btnBurnVent.disabled = false;
+
+        alert("Dissolved. You let it go. Remember: emotions rise like waves, but they always pass. Take a deep breath.");
+      }, 1850);
+    });
+  }
+
+  // Patience Sprout Trainer Handler
+  const btnWater = document.getElementById("btn-water-hold");
+  const progressBar = document.getElementById("patience-progress-bar");
+  const timerLabel = document.getElementById("patience-timer-label");
+  const seedDisplay = document.getElementById("patience-seed-display");
+  
+  let patienceInterval = null;
+  let patienceElapsed = 0; // milliseconds
+  const targetPatienceTime = 15000; // 15 seconds
+  let patientToneOsc = null;
+
+  function stopPatienceTone() {
+    if (patientToneOsc) {
+      try {
+        patientToneOsc.stop();
+      } catch(e) {}
+      patientToneOsc = null;
+    }
+  }
+
+  function playPatienceTone(startFreq, currentElapsed) {
+    try {
+      initAudio();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      
+      if (!patientToneOsc) {
+        patientToneOsc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        patientToneOsc.type = "sine";
+        patientToneOsc.frequency.setValueAtTime(startFreq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        patientToneOsc.connect(gain);
+        gain.connect(audioCtx.destination);
+        patientToneOsc.start();
+      }
+      
+      // Sweep pitch from startFreq to octave above as hold duration increases
+      const progressPercent = currentElapsed / targetPatienceTime;
+      const targetFreq = startFreq + (progressPercent * 260);
+      patientToneOsc.frequency.linearRampToValueAtTime(targetFreq, audioCtx.currentTime + 0.1);
+    } catch(e) {}
+  }
+
+  if (btnWater && progressBar && timerLabel && seedDisplay) {
+    const handlePressStart = (e) => {
+      e.preventDefault();
+      
+      patienceElapsed = 0;
+      progressBar.style.width = "0%";
+      seedDisplay.innerText = "🪨";
+      seedDisplay.style.transform = "scale(1)";
+      timerLabel.innerText = "Hold to water: 15.0s remaining";
+      timerLabel.style.color = "var(--text-secondary)";
+      
+      btnWater.innerText = "💧 Watering Sprout...";
+      btnWater.style.background = "linear-gradient(135deg, var(--accent-cyan), #0891b2)";
+      
+      patienceInterval = setInterval(() => {
+        patienceElapsed += 100;
+        const remaining = Math.max(0, (targetPatienceTime - patienceElapsed) / 1000);
+        progressBar.style.width = `${(patienceElapsed / targetPatienceTime) * 100}%`;
+        timerLabel.innerText = `Hold to water: ${remaining.toFixed(1)}s remaining`;
+
+        playPatienceTone(220, patienceElapsed);
+
+        // Visual growth stages
+        if (patienceElapsed >= 3000 && patienceElapsed < 7000) {
+          seedDisplay.innerText = "🌱";
+          seedDisplay.style.transform = "scale(1.1)";
+        } else if (patienceElapsed >= 7000 && patienceElapsed < 12000) {
+          seedDisplay.innerText = "🌿";
+          seedDisplay.style.transform = "scale(1.2)";
+        } else if (patienceElapsed >= 12000 && patienceElapsed < 15000) {
+          seedDisplay.innerText = "🌸";
+          seedDisplay.style.transform = "scale(1.3)";
+        }
+
+        if (patienceElapsed >= targetPatienceTime) {
+          clearInterval(patienceInterval);
+          patienceInterval = null;
+          stopPatienceTone();
+
+          seedDisplay.innerText = "🌳";
+          seedDisplay.style.transform = "scale(1.5)";
+          timerLabel.innerText = "Success! You practiced patience. 🌳";
+          timerLabel.style.color = "var(--accent-emerald)";
+          
+          btnWater.innerText = "🎉 Sprout Fully Grown!";
+          btnWater.style.background = "linear-gradient(135deg, var(--accent-emerald), #059669)";
+          btnWater.disabled = true;
+
+          playCalmBell();
+          
+          const affirmations = [
+            "Patience is not the ability to wait, but the ability to keep a good attitude while waiting. 🕊️",
+            "Slow, deliberate progress is the only progress that lasts. You did great. 🌱",
+            "Exam ranks are built day-by-day, page-by-page. Trust your slow growth. 🌳",
+            "By taking these 15 seconds to pause, you trained your brain to resist impulse stress. 🧠"
+          ];
+          const randomAff = affirmations[Math.floor(Math.random() * affirmations.length)];
+          alert(randomAff);
+
+          setTimeout(() => {
+            btnWater.disabled = false;
+            btnWater.innerText = "💧 Press & Hold to Water";
+            btnWater.style.background = "linear-gradient(135deg, var(--accent-emerald), #059669)";
+            seedDisplay.innerText = "🪨";
+            seedDisplay.style.transform = "scale(1)";
+            progressBar.style.width = "0%";
+            timerLabel.innerText = "Hold to water: 15.0s remaining";
+            timerLabel.style.color = "var(--text-secondary)";
+          }, 6000);
+        }
+      }, 100);
+    };
+
+    const handlePressEnd = () => {
+      if (patienceInterval) {
+        clearInterval(patienceInterval);
+        patienceInterval = null;
+        stopPatienceTone();
+
+        progressBar.style.width = "0%";
+        timerLabel.innerText = "Practicing patience takes focus! Try holding again.";
+        timerLabel.style.color = "var(--accent-rose)";
+        
+        seedDisplay.innerText = "🪨";
+        seedDisplay.style.transform = "scale(1)";
+        
+        btnWater.innerText = "💧 Press & Hold to Water";
+        btnWater.style.background = "linear-gradient(135deg, var(--accent-emerald), #059669)";
+      }
+    };
+
+    btnWater.addEventListener("mousedown", handlePressStart);
+    btnWater.addEventListener("mouseup", handlePressEnd);
+    btnWater.addEventListener("mouseleave", handlePressEnd);
+
+    btnWater.addEventListener("touchstart", handlePressStart);
+    btnWater.addEventListener("touchend", handlePressEnd);
+  }
+
+  // ==========================================================================
+  // 9. Demotivators Practical Actions Listeners
+  // ==========================================================================
+  
+  // Demotivator Accordion Drawer Toggle
+  const demotivatorToggleBtns = document.querySelectorAll(".demotivator-toggle-btn");
+  demotivatorToggleBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const content = btn.nextElementSibling;
+      const arrow = btn.querySelector(".demotivator-arrow");
+      const isHidden = content.style.display === "none" || !content.style.display;
+      if (isHidden) {
+        content.style.display = "block";
+        if (arrow) arrow.innerText = "▲ Collapse";
+      } else {
+        content.style.display = "none";
+        if (arrow) arrow.innerText = "▼ Expand";
+      }
+    });
+  });
+
+  // Mock Test Error Logger Form Submission
+  const btnAddMockErr = document.getElementById("btn-add-mock-err");
+  const mockErrTopic = document.getElementById("mock-err-topic");
+  const mockErrCause = document.getElementById("mock-err-cause");
+  if (btnAddMockErr && mockErrTopic && mockErrCause) {
+    btnAddMockErr.addEventListener("click", () => {
+      const topic = mockErrTopic.value.trim();
+      const cause = mockErrCause.value;
+      if (!topic) {
+        alert("Please enter a specific question or topic that you got wrong first.");
+        return;
+      }
+      const errors = JSON.parse(localStorage.getItem("mindflow_mock_errors") || "[]");
+      const time = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      errors.push({ topic, cause, time });
+      localStorage.setItem("mindflow_mock_errors", JSON.stringify(errors));
+      renderMockErrors();
+      mockErrTopic.value = "";
+      playCalmBell();
+    });
+  }
+
+  // Tiny Wins persistence
+  for (let i = 1; i <= 3; i++) {
+    const checkbox = document.getElementById(`win-check-${i}`);
+    const textInput = document.getElementById(`win-text-${i}`);
+    if (checkbox) checkbox.addEventListener("change", saveWins);
+    if (textInput) {
+      textInput.addEventListener("input", saveWins);
+      textInput.addEventListener("change", saveWins);
+    }
+  }
+
+  // Focus Oath persistence
+  for (let i = 1; i <= 2; i++) {
+    const checkbox = document.getElementById(`oath-check-${i}`);
+    if (checkbox) checkbox.addEventListener("change", saveOaths);
+  }
+
+  // Physical stretch check persistence
+  for (let i = 1; i <= 3; i++) {
+    const checkbox = document.getElementById(`stretch-check-${i}`);
+    if (checkbox) checkbox.addEventListener("change", saveStretches);
+  }
+
+  // Action Center Redirect Links
+  const btnActionGoJournal = document.getElementById("btn-action-go-journal");
+  if (btnActionGoJournal) {
+    btnActionGoJournal.addEventListener("click", () => {
+      const tab = document.querySelector(".nav-item[data-tab='journal']") || document.querySelector(".mobile-nav-item[data-tab='journal']");
+      if (tab) tab.click();
+      document.getElementById("journal-input")?.focus();
+      document.getElementById("journal-input")?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
+  const btnActionGoStreak = document.getElementById("btn-action-go-streak");
+  if (btnActionGoStreak) {
+    btnActionGoStreak.addEventListener("click", () => {
+      const tab = document.querySelector(".nav-item[data-tab='journal']") || document.querySelector(".mobile-nav-item[data-tab='journal']");
+      if (tab) tab.click();
+      const insightsContent = document.getElementById("insights-accordion-content");
+      const accordionArrow = document.getElementById("accordion-arrow");
+      if (insightsContent && insightsContent.style.display === "none") {
+        insightsContent.style.display = "block";
+        if (accordionArrow) accordionArrow.innerText = "▲ Collapse";
+        renderCharts();
+      }
+      setTimeout(() => {
+        document.getElementById("insights-accordion")?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    });
+  }
+
+  const btnActionSighBreathe = document.getElementById("btn-action-sigh-breathe");
+  if (btnActionSighBreathe) {
+    btnActionSighBreathe.addEventListener("click", () => {
+      const tab = document.querySelector(".nav-item[data-tab='toolkit']") || document.querySelector(".mobile-nav-item[data-tab='toolkit']");
+      if (tab) tab.click();
+      setTimeout(() => {
+        document.getElementById("breathing-ring")?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
+    });
+  }
+
+  const btnActionGoVent = document.getElementById("btn-action-go-vent");
+  if (btnActionGoVent) {
+    btnActionGoVent.addEventListener("click", () => {
+      const tab = document.querySelector(".nav-item[data-tab='toolkit']") || document.querySelector(".mobile-nav-item[data-tab='toolkit']");
+      if (tab) tab.click();
+      setTimeout(() => {
+        const ventInp = document.getElementById("vent-input");
+        if (ventInp) {
+          ventInp.focus();
+          ventInp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 150);
+    });
+  }
+
+  const btnActionSleepHum = document.getElementById("btn-action-sleep-hum");
+  if (btnActionSleepHum) {
+    btnActionSleepHum.addEventListener("click", () => {
+      const brownCard = document.querySelector(".sound-card[data-sound='brown']");
+      if (brownCard) {
+        if (!brownCard.classList.contains("active")) {
+          brownCard.click();
+        }
+        const tab = document.querySelector(".nav-item[data-tab='toolkit']") || document.querySelector(".mobile-nav-item[data-tab='toolkit']");
+        if (tab) tab.click();
+        setTimeout(() => {
+          brownCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 150);
+      }
+    });
+  }
+
+  const btnActionSetWalk = document.getElementById("btn-action-set-walk");
+  if (btnActionSetWalk) {
+    btnActionSetWalk.addEventListener("click", () => {
+      playCalmBell();
+      alert("🚶 Walk Alert Scheduled! We will simulate a supportive push notification on your device in 15 minutes to remind you to take a breath and walk outside.");
+    });
+  }
+
+  // Google Gemini API key configuration
+  const btnSaveGeminiKey = document.getElementById("btn-save-gemini-key");
+  const geminiKeyInput = document.getElementById("gemini-key-input");
+  const geminiStatusLabel = document.getElementById("gemini-status-label");
+
+  if (btnSaveGeminiKey && geminiKeyInput && geminiStatusLabel) {
+    const savedKey = localStorage.getItem("mindflow_gemini_key");
+    if (savedKey) {
+      geminiKeyInput.value = savedKey;
+      geminiStatusLabel.innerText = "Connected (Google Gemini AI Active) ✨";
+      geminiStatusLabel.style.color = "var(--accent-emerald)";
+    }
+
+    btnSaveGeminiKey.addEventListener("click", () => {
+      const key = geminiKeyInput.value.trim();
+      if (key) {
+        localStorage.setItem("mindflow_gemini_key", key);
+        geminiStatusLabel.innerText = "Connected (Google Gemini AI Active) ✨";
+        geminiStatusLabel.style.color = "var(--accent-emerald)";
+        playCalmBell();
+        alert("Google Gemini API Key saved successfully! Write a journal entry and pause to see real-time AI reflections.");
+      } else {
+        localStorage.removeItem("mindflow_gemini_key");
+        geminiStatusLabel.innerText = "Not connected (falling back to Local Sentiment Engine)";
+        geminiStatusLabel.style.color = "var(--text-muted)";
+        playCalmBell();
+        alert("Gemini API Key removed. Reverted to local NLP rules engine.");
+      }
+    });
+  }
+}

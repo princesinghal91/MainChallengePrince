@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aap Zaroori Ho - Student Well-being Companion</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==========================================================================
+       LOGIN GATING PORTAL
+       ========================================================================== -->
+  <div class="login-overlay active" id="login-portal">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-icon" style="margin-bottom: 0.75rem; font-size: 1.6rem; width: 48px; height: 48px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan)); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);">🌌</div>
+        <span class="logo-text" style="font-size: 1.8rem; letter-spacing: -0.5px; font-weight: 800; background: linear-gradient(to right, var(--text-primary), var(--text-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Aap Zaroori Ho</span>
+      </div>
+      <p class="login-subtitle">Your private well-being companion for exam prep. Enter your details to create a secure local profile.</p>
+      
+      <div class="login-form">
+        <div class="form-group">
+          <label for="login-name">Student Name</label>
+          <input type="text" id="login-name" placeholder="e.g. Prince Singhal" required style="background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); border-radius: 6px; padding: 0.6rem 0.85rem; color: white; font-family: var(--font-sans); font-size: 0.9rem; outline: none; transition: border-color var(--transition-fast);">
+        </div>
+        
+        <div class="form-group">
+          <label for="login-phone">10-Digit Mobile / Roll Number</label>
+          <input type="tel" id="login-phone" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required style="background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); border-radius: 6px; padding: 0.6rem 0.85rem; color: white; font-family: var(--font-sans); font-size: 0.9rem; outline: none; transition: border-color var(--transition-fast);">
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label for="login-exam">Exam Preparation Focus</label>
+          <select id="login-exam" class="exam-select" style="width: 100%; border: 1px solid var(--card-border); background: var(--bg-tertiary); border-radius: 6px; padding: 0.6rem 0.75rem; color: white; outline: none; font-weight: 600; cursor: pointer;">
+            <option value="JEE">JEE Main & Advanced</option>
+            <option value="NEET">NEET UG</option>
+            <option value="UPSC">UPSC Civil Services</option>
+            <option value="Board">10th / 12th Boards</option>
+            <option value="CAT">CAT (MBA Entrance)</option>
+            <option value="GATE">GATE (Engineering)</option>
+            <option value="CUET">CUET UG</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; align-items: flex-start; margin-top: 0.5rem; margin-bottom: 1.5rem;">
+          <input type="checkbox" id="login-agree" checked required style="margin-top: 3px; cursor: pointer;">
+          <label for="login-agree" style="font-size: 0.72rem; color: var(--text-secondary); line-height: 1.4; cursor: pointer; user-select: none;">
+            I agree that my logs are stored 100% locally on this browser session for privacy security.
+          </label>
+        </div>
+        
+        <button class="btn-primary" id="btn-login-submit" style="width: 100%; background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan)); font-weight: 800; border: none; padding: 0.75rem; border-radius: 6px; color: white; cursor: pointer; transition: transform 0.2s; margin-bottom: 0.5rem;">Enter Companion</button>
+        <button class="btn-secondary" id="btn-login-anonymous" style="width: 100%; border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.02); font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 0.75rem; border-radius: 6px;">Enter Anonymously (Incognito Mode)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- ==========================================================================
+         DESKTOP SIDEBAR NAVIGATION
+         ========================================================================== -->
+    <aside class="sidebar">
+      <div class="logo-container" style="margin-bottom: 0.75rem;">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" x2="12" y1="19" y2="22"/>
+          </svg>
+        </div>
+        <span class="logo-text">Aap Zaroori Ho</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--accent-emerald); background: rgba(16, 185, 129, 0.08); padding: 0.25rem 0.6rem; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2); font-weight: 600; margin-bottom: 2rem; width: fit-content;" class="privacy-badge">
+        <span>🔒 Zero-Server Privacy</span>
+      </div>
+
+      <nav class="nav-menu">
+        <li class="nav-item active" data-tab="journal">
+          <a class="nav-link">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <span>Daily Reset</span>
+          </a>
+        </li>
+        <li class="nav-item" data-tab="toolkit">
+          <a class="nav-link">
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"/><path d="M12 6v6l4 2"/></svg>
+            <span>Cozy Corner</span>
+          </a>
+        </li>
+        <li class="nav-item" data-tab="resources">
+          <a class="nav-link">
+            <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <span>Care Guide</span>
+          </a>
+        </li>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-crisis" id="btn-crisis-trigger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Talk to Someone
+        </button>
+        <div style="margin-top: 1.5rem;" class="user-widget">
+          <div class="user-avatar" id="user-avatar-char">S</div>
+          <div class="user-info">
+            <span class="user-name">Student Companion</span>
+            <span class="user-exam" id="user-exam-tag">Target: JEE</span>
+            <a href="#" id="btn-logout" style="color: var(--accent-rose); font-size: 0.75rem; text-decoration: none; font-weight: 600; margin-top: 0.25rem; display: block; opacity: 0.8; transition: opacity 0.2s;">Log out</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==========================================================================
+         MOBILE BOTTOM NAVIGATION
+         ========================================================================== -->
+    <nav class="mobile-nav">
+      <a class="mobile-nav-item active" data-tab="journal">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span>Reset</span>
+      </a>
+      <a class="mobile-nav-item" data-tab="toolkit">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"/><path d="M12 6v6l4 2"/></svg>
+        <span>Breathe</span>
+      </a>
+      <a class="mobile-nav-item" data-tab="resources">
+        <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>Guide</span>
+      </a>
+    </nav>
+
+    <!-- ==========================================================================
+         MAIN CONTENT AREA
+         ========================================================================== -->
+    <main class="main-content">
+      
+      <!-- Top Header Controls -->
+      <header>
+        <div class="header-title-area">
+          <h1 id="welcome-message">Hello, Companion</h1>
+          <p id="current-date-str">Saturday, June 6, 2026</p>
+        </div>
+        <div class="header-controls">
+          <button class="btn-emergency-call" id="btn-panic-sos" style="background: linear-gradient(135deg, var(--accent-rose), #dc2626); box-shadow: 0 0 15px rgba(244, 63, 94, 0.4); animation: pulseRed 2s infinite; font-weight: 800; font-size: 0.85rem; padding: 0.55rem 1.1rem; border-radius: var(--radius-md); border: none; color: white; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; height: fit-content; transition: var(--transition-fast);">
+            🆘 SOS Reset
+          </button>
+          <div class="exam-select-wrapper">
+            <label for="exam-selector">Exam Target:</label>
+            <select id="exam-selector" class="exam-select">
+              <option value="JEE">JEE Main & Advanced</option>
+              <option value="NEET">NEET UG</option>
+              <option value="UPSC">UPSC Civil Services</option>
+              <option value="Board">10th / 12th Boards</option>
+              <option value="CAT">CAT (MBA Entrance)</option>
+              <option value="GATE">GATE (Engineering)</option>
+              <option value="CUET">CUET UG</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- Daily Quote Banner -->
+      <div class="affirmation-banner" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div class="affirmation-icon">✨</div>
+          <div>
+            <span class="affirmation-text" id="daily-affirmation">"Your value is not defined by a single test score. You are growing, learning, and capable of overcoming this storm."</span>
+            <span class="affirmation-author" id="daily-affirmation-author">— Aap Zaroori Ho Guide</span>
+          </div>
+        </div>
+        <button id="btn-watch-reel" class="btn-primary" style="white-space: nowrap; font-size: 0.8rem; padding: 0.5rem 1rem; border-radius: 20px; background: linear-gradient(135deg, #8b5cf6, #ec4899); border: none; font-weight: 700;">▶ Watch 30s Story</button>
+      </div>
+
+      <!-- ==========================================================================
+           TAB VIEW: DAILY RESET (DEFAULT ACTIVE)
+           ========================================================================== -->
+      <section id="journal-view" class="view-panel active">
+        <div class="grid-2-1">
+          <!-- Input Form Panel -->
+          <div class="glass-card">
+            <div class="card-header">
+              <h3 class="card-title">Log Your Mind State</h3>
+            </div>
+
+            <!-- Emoji Selector -->
+            <div class="trigger-headline">How are you feeling right now?</div>
+            <div class="mood-selector">
+              <button class="mood-btn" data-mood="Joyful" style="--active-color: var(--accent-emerald); --active-color-rgb: 16, 185, 129;">
+                <span class="mood-emoji">🤩</span>
+                <span class="mood-name">Joyful</span>
+              </button>
+              <button class="mood-btn" data-mood="Calm" style="--active-color: var(--accent-cyan); --active-color-rgb: 6, 182, 212;">
+                <span class="mood-emoji">😌</span>
+                <span class="mood-name">Calm</span>
+              </button>
+              <button class="mood-btn" data-mood="Anxious" style="--active-color: var(--accent-amber); --active-color-rgb: 245, 158, 11;">
+                <span class="mood-emoji">😟</span>
+                <span class="mood-name">Anxious</span>
+              </button>
+              <button class="mood-btn" data-mood="Stressed" style="--active-color: var(--accent-purple); --active-color-rgb: 139, 92, 246;">
+                <span class="mood-emoji">😫</span>
+                <span class="mood-name">Stressed</span>
+              </button>
+              <button class="mood-btn" data-mood="Burnt-Out" style="--active-color: var(--accent-rose); --active-color-rgb: 244, 63, 94;">
+                <span class="mood-emoji">🥀</span>
+                <span class="mood-name">Burnt-out</span>
+              </button>
+            </div>
+
+            <!-- Stress Triggers Multi-select -->
+            <div class="trigger-headline">What is driving this feeling? (Select Triggers)</div>
+            <div class="trigger-chips" id="trigger-chips-box">
+              <div class="trigger-chip" data-trigger="Mock Results">📝 Mock test results</div>
+              <div class="trigger-chip" data-trigger="Syllabus Backlog">📚 Syllabus Backlog</div>
+              <div class="trigger-chip" data-trigger="Peer Comparison">👥 Peer Pressure</div>
+              <div class="trigger-chip" data-trigger="Family Expectations">🏠 Family Expectations</div>
+              <div class="trigger-chip" data-trigger="Time Crunch">⏰ Time Management</div>
+              <div class="trigger-chip" data-trigger="Sleep Deprived">🌙 Sleep Quality</div>
+              <div class="trigger-chip" data-trigger="Exam Day Uncertainty">🔮 Uncertainty</div>
+              <div class="trigger-chip" data-trigger="Physical Health">🔋 Physical Health</div>
+            </div>
+
+            <!-- Guided Reflection Journal -->
+            <div class="journal-prompt-header">
+              <div class="journal-prompt-text" id="active-journal-prompt">Write down what's on your mind. How are you holding up today?</div>
+              <button class="btn-shuffle" id="btn-prompt-shuffle">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                Change Prompt
+              </button>
+            </div>
+            <textarea class="journal-textarea" id="journal-input" placeholder="Type here. E.g. 'I feel a bit overwhelmed because of my backlog and mock test scores...'"></textarea>
+
+            <div class="journal-footer">
+              <span class="journal-status-helper" id="journal-sentiment-preview">Type to analyze emotional vibe...</span>
+              <button class="btn-primary" id="btn-save-log">Save Log Entry</button>
+            </div>
+          </div>
+
+          <!-- Dynamic Encouragement / Analysis Insights -->
+          <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="card-header">
+                <h3 class="card-title">Real-time Affirmation</h3>
+              </div>
+              <div style="background: rgba(255, 255, 255, 0.01); border: 1px dashed var(--card-border); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+                <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); min-height: 120px;" id="realtime-sentiment-feedback">
+                  As you share your thoughts, our local wellness guide will provide custom reassurance to help you manage the load.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--accent-cyan);">Journaling Tips:</h4>
+              <ul style="font-size: 0.8rem; color: var(--text-secondary); list-style: none; display: flex; flex-direction: column; gap: 0.5rem; padding-left: 0;">
+                <li>📍 <strong>Be honest</strong>: No one else can read this. Dump all raw emotions.</li>
+                <li>📍 <strong>Be concrete</strong>: Pinpoint what exact chapter or topic is bothering you.</li>
+                <li>📍 <strong>Acknowledge effort</strong>: Write one small task you finished, even if it's just opening the book.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collapsible Analytics Section -->
+        <div class="glass-card" style="margin-top: 2rem;" id="insights-accordion">
+          <button id="btn-toggle-insights" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 1.05rem; font-weight: 700; color: var(--text-primary); cursor: pointer; outline: none; padding: 0.25rem 0;">
+            <span style="display: flex; align-items: center; gap: 0.65rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 1px;"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+              📊 View My Well-being Insights & Mood Trends (Optional)
+            </span>
+            <span id="accordion-arrow" style="font-size: 0.85rem; color: var(--text-secondary); transition: transform var(--transition-fast);">▼ Expand</span>
+          </button>
+          
+          <div id="insights-accordion-content" style="display: none; margin-top: 1.5rem;">
+            <!-- Top Metrics Row -->
+            <div class="grid-3" style="margin-bottom: 1.5rem;">
+              <div class="glass-card" style="background: rgba(255,255,255,0.01); padding: 1.25rem;">
+                <div class="metric-box">
+                  <div class="metric-icon-box icon-purple" style="width: 44px; height: 44px; font-size: 1.2rem;">😊</div>
+                  <div class="metric-info">
+                    <span class="metric-value" id="stat-mood-index" style="font-size: 1.35rem;">--</span>
+                    <span class="metric-label" style="font-size: 0.75rem;">Mood Index</span>
+                  </div>
+                </div>
+              </div>
+              <div class="glass-card" style="background: rgba(255,255,255,0.01); padding: 1.25rem;">
+                <div class="metric-box">
+                  <div class="metric-icon-box icon-rose" style="width: 44px; height: 44px; font-size: 1.2rem;">⚡</div>
+                  <div class="metric-info">
+                    <span class="metric-value" id="stat-stress-trigger" style="font-size: 1.35rem;">None</span>
+                    <span class="metric-label" style="font-size: 0.75rem;">Top Stress Trigger</span>
+                  </div>
+                </div>
+              </div>
+              <div class="glass-card" style="background: rgba(255,255,255,0.01); padding: 1.25rem;">
+                <div class="metric-box">
+                  <div class="metric-icon-box icon-cyan" style="width: 44px; height: 44px; font-size: 1.2rem;">🔥</div>
+                  <div class="metric-info">
+                    <span class="metric-value" id="stat-streak" style="font-size: 1.35rem;">0 Days</span>
+                    <span class="metric-label" style="font-size: 0.75rem;">Streak</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid-2" style="margin-bottom: 0;">
+              <!-- Mood History Line Graph -->
+              <div class="glass-card" style="background: rgba(255,255,255,0.01); padding: 1.25rem;">
+                <div class="card-header" style="margin-bottom: 1rem;">
+                  <h3 class="card-title" style="font-size: 1.05rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    Well-being Trend
+                  </h3>
+                </div>
+                <div style="position: relative; height: 200px; width: 100%;">
+                  <canvas id="mood-trend-canvas" style="display: block; width: 100%; height: 100%;"></canvas>
+                </div>
+              </div>
+
+              <!-- Trigger Tracker Summary -->
+              <div class="glass-card" style="background: rgba(255,255,255,0.01); padding: 1.25rem;">
+                <div class="card-header" style="margin-bottom: 1rem;">
+                  <h3 class="card-title" style="font-size: 1.05rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Trigger Index
+                  </h3>
+                </div>
+                <div style="position: relative; height: 200px; width: 100%;">
+                  <canvas id="trigger-chart-canvas" style="display: block; width: 100%; height: 100%;"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           TAB VIEW 3: STRESS BUSTER TOOLKIT
+           ========================================================================== -->
+      <section id="toolkit-view" class="view-panel">
+        <div class="grid-2">
+          
+          <!-- 4-7-8 Breathing Circle -->
+          <div class="glass-card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"/><path d="M12 6v6l4 2"/></svg>
+                4-7-8 Deep Breathing Guide
+              </h3>
+            </div>
+            
+            <div class="breathing-card-content">
+              <div class="breathing-outer-ring" id="breathing-ring">
+                <div class="breathing-glow-ring"></div>
+                <div class="breathing-circle" id="breathing-bubble">
+                  <span class="breath-phase" id="breath-phase-text">Ready</span>
+                  <span class="breath-timer" id="breath-timer-text">Click Start</span>
+                </div>
+              </div>
+              
+              <div class="breathing-btn-group">
+                <button class="btn-primary" id="btn-breathing-toggle">Start Breathing</button>
+                <button class="btn-secondary" id="btn-breathing-reset">Reset</button>
+              </div>
+              
+              <p style="font-size: 0.8rem; color: var(--text-secondary); text-align: center; max-width: 380px; margin-top: 1.5rem; line-height: 1.4;">
+                <strong>Inhale</strong> for 4s (expand), <strong>Hold</strong> for 7s, then <strong>Exhale</strong> slowly for 8s (contract). This resets your autonomic nervous system instantly.
+              </p>
+            </div>
+          </div>
+
+          <!-- Dynamic Soundscapes & Grounding Panel -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <!-- Interactive Venting Box (Burn away anger & worry) -->
+            <div class="glass-card" id="venting-card">
+              <div class="card-header">
+                <h3 class="card-title" style="color: #fda4af;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-rose)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  Mind Melt: Burn Your Anger & Worries
+                </h3>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">
+                Feeling angry, frustrated, or hopeless? Pour out your raw thoughts below. Then click Burn to watch them blur, dissolve, and vanish from your screen. (Nothing is saved).
+              </p>
+              <textarea id="vent-input" class="journal-textarea" style="min-height: 100px; font-size: 0.88rem; margin-bottom: 1rem; border-color: rgba(244, 63, 94, 0.2);" placeholder="Hate this chapter? Annoyed at peer competition? Just let it out..."></textarea>
+              <button class="btn-primary" id="btn-burn-vent" style="background: linear-gradient(135deg, var(--accent-rose), #e11d48); box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3); width: 100%; font-weight: 700;">🔥 Burn & Let It Go</button>
+            </div>
+
+            <!-- Interactive Patience Sprout Trainer -->
+            <div class="glass-card" id="patience-sprout-card" style="border-color: rgba(16, 185, 129, 0.25); background: linear-gradient(135deg, rgba(16, 185, 129, 0.03), rgba(22, 18, 46, 0.45));">
+              <div class="card-header">
+                <h3 class="card-title" style="color: #a7f3d0;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  Patience Sprout: Impulse Control Trainer
+                </h3>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.4;">
+                This generation runs on fast feeds, but mastering exam syllabus requires steady patience. Water your mental seed by <strong>pressing and holding</strong> the button below for 15 continuous seconds. Letting go early resets it.
+              </p>
+              
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
+                <div id="patience-seed-display" style="font-size: 3.5rem; transition: transform 0.3s ease; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.25));">🪨</div>
+                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; position: relative;">
+                  <div id="patience-progress-bar" style="width: 0%; height: 100%; background: var(--accent-emerald); transition: width 0.1s linear;"></div>
+                </div>
+                <span id="patience-timer-label" style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">Hold to water: 15.0s remaining</span>
+              </div>
+              
+              <button class="btn-primary" id="btn-water-hold" style="background: linear-gradient(135deg, var(--accent-emerald), #059669); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); width: 100%; cursor: pointer; user-select: none; font-weight: 700; -webkit-user-select: none;">💧 Press & Hold to Water</button>
+            </div>
+
+            <!-- Ambient soundscape player -->
+            <div class="glass-card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                  Focus Soundscapes (Offline)
+                </h3>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Combine frequencies to block distractions and ease exam tension. Synthesized right in your browser.
+              </p>
+
+              <div class="sound-console-grid">
+                <div class="sound-card" data-sound="rain">
+                  <div class="sound-icon">🌧️</div>
+                  <div class="sound-info">
+                    <span class="sound-name">Rain Shower</span>
+                    <span class="sound-desc">Soft, masking white noise</span>
+                  </div>
+                  <div class="sound-waves">
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                  </div>
+                </div>
+
+                <div class="sound-card" data-sound="binaural">
+                  <div class="sound-icon">🧠</div>
+                  <div class="sound-info">
+                    <span class="sound-name">Focus Waves</span>
+                    <span class="sound-desc">Binaural beats (10Hz Alpha)</span>
+                  </div>
+                  <div class="sound-waves">
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                  </div>
+                </div>
+
+                <div class="sound-card" data-sound="brown">
+                  <div class="sound-icon">🪵</div>
+                  <div class="sound-info">
+                    <span class="sound-name">Brownian Hum</span>
+                    <span class="sound-desc">Deep static for concentration</span>
+                  </div>
+                  <div class="sound-waves">
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                  </div>
+                </div>
+
+                <div class="sound-card" data-sound="melody">
+                  <div class="sound-icon">🎵</div>
+                  <div class="sound-info">
+                    <span class="sound-name">Ambient Drone</span>
+                    <span class="sound-desc">Calm synth drone pad</span>
+                  </div>
+                  <div class="sound-waves">
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="volume-slider-container">
+                <label for="ambient-volume">Master Volume</label>
+                <input type="range" id="ambient-volume" class="volume-slider" min="0" max="1" step="0.05" value="0.5">
+              </div>
+            </div>
+
+            <!-- Grounding Panel (5-4-3-2-1 technique) -->
+            <div class="glass-card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-rose)" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  5-4-3-2-1 Grounding Anchor
+                </h3>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                When anxiety hits during revision, observe your immediate physical space to slow racing thoughts.
+              </p>
+
+              <div class="grounding-box">
+                <div class="grounding-step-card">
+                  <div class="grounding-number">5</div>
+                  <div class="grounding-content">
+                    <div class="grounding-step-title">Things you can SEE</div>
+                    <div class="grounding-step-desc">Name them: A blue book, the fan spinning, pencil lead, wall chart...</div>
+                  </div>
+                </div>
+                <div class="grounding-step-card">
+                  <div class="grounding-number">4</div>
+                  <div class="grounding-content">
+                    <div class="grounding-step-title">Things you can TOUCH</div>
+                    <div class="grounding-step-desc">Feel them: Cool keyboard keys, warm mug, wooden desk, cotton shirt...</div>
+                  </div>
+                </div>
+                <div class="grounding-step-card">
+                  <div class="grounding-number">3</div>
+                  <div class="grounding-content">
+                    <div class="grounding-step-title">Things you can HEAR</div>
+                    <div class="grounding-step-desc">Listen: The hum of the fridge, birds outside, a clock ticking...</div>
+                  </div>
+                </div>
+                <div class="grounding-step-card">
+                  <div class="grounding-number">2</div>
+                  <div class="grounding-content">
+                    <div class="grounding-step-title">Things you can SMELL</div>
+                    <div class="grounding-step-desc">Inhale: Pencil eraser shavings, tea aroma, rain-dampened earth...</div>
+                  </div>
+                </div>
+                <div class="grounding-step-card">
+                  <div class="grounding-number">1</div>
+                  <div class="grounding-content">
+                    <div class="grounding-step-title">Good thing about YOURSELF</div>
+                    <div class="grounding-step-desc">Say it: "I am showing up, I am giving my best efforts today."</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           TAB VIEW 4: CARE PACKAGE & EXAM TIPS
+           ========================================================================== -->
+      <section id="resources-view" class="view-panel">
+        
+        <!-- Result Panic Emergency Banner -->
+        <div class="emergency-banner">
+          <div class="emergency-info">
+            <div class="emergency-icon">🚨</div>
+            <div class="emergency-text">
+              <h4>Result Day Anxiety Relief Kit</h4>
+              <p>
+                Got results coming out or recently declared? Panic can block clear thinking. Open our grounding response panel and remember: your score is a marker, not your destination.
+              </p>
+            </div>
+          </div>
+          <button class="btn-emergency-call" id="btn-panic-kit-trigger">Open Panic Relief Tips</button>
+        </div>
+
+        <div class="care-grid">
+          
+          <!-- Customizable Exam Care Box -->
+          <div class="glass-card">
+            <div class="care-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              Mental Care for <span id="exam-card-title-name">JEE</span> Aspirants
+            </div>
+            
+            <div class="advice-list" id="exam-specific-advice-container">
+              <!-- Dynamically populated via app.js -->
+            </div>
+          </div>
+
+          <!-- Daily Study & Reset Planner -->
+          <div class="glass-card">
+            <div class="care-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              Stress-Resilient Study Habits
+            </div>
+
+            <div class="advice-list">
+              <div class="advice-item">
+                <div class="advice-bullet" style="color: var(--accent-cyan)">⏱️</div>
+                <div class="advice-body">
+                  <span class="advice-heading">Strict 50-10 Pacing</span>
+                  <span class="advice-text">Study for 50 minutes, then get UP for 10 minutes. Do not check your phone; instead, walk, stretch, or drink water. This lets your memory consolidate.</span>
+                </div>
+              </div>
+
+              <div class="advice-item">
+                <div class="advice-bullet" style="color: var(--accent-purple)">🎯</div>
+                <div class="advice-body">
+                  <span class="advice-heading">Micro-Revision Goals</span>
+                  <span class="advice-text">Avoid setting massive daily targets like "Finish organic chemistry." Target "Solve 10 reaction mechanisms." Small successes release dopamine and fight avoidance.</span>
+                </div>
+              </div>
+
+              <div class="advice-item">
+                <div class="advice-bullet" style="color: var(--accent-rose)">💤</div>
+                <div class="advice-body">
+                  <span class="advice-heading">Sleep is Part of Prep</span>
+                  <span class="advice-text">Pulling all-nighters reduces memory retention by up to 40%. Six to seven hours of deep sleep is as essential to your percentile as mock exams.</span>
+                </div>
+              </div>
+
+              <div class="advice-item">
+                <div class="advice-bullet" style="color: var(--accent-amber)">👥</div>
+                <div class="advice-body">
+                  <span class="advice-heading">The Comparison Shield</span>
+                  <span class="advice-text">Stop asking friends, "How much have you finished?" Their journey is separate. Focus strictly on your own mistake logs from the last mock test.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top 10 Student Demotivators & Practical Action Console -->
+        <div class="glass-card" style="margin-top: 1.5rem; border-color: rgba(245, 158, 11, 0.25);" id="demotivators-card">
+          <div class="care-section-title" style="color: var(--accent-amber); border-bottom-color: rgba(245, 158, 11, 0.15);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Top 10 Demotivators & Practical Solutions
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
+            What day-to-day issue is holding you back right now? Click to expand the issue, and use the **Practical Action Center** built right into each card to solve it.
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 0.85rem;" class="demotivators-list">
+            <!-- Item 1: Mock Score Shock -->
+            <div style="border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(255,255,255,0.015); overflow: hidden;">
+              <button class="demotivator-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 1rem 1.25rem; text-align: left; transition: var(--transition-fast);">
+                <span>1. Mock Test Score Shock 📊</span>
+                <span class="demotivator-arrow" style="font-size: 0.75rem; color: var(--text-muted);">▼ Expand</span>
+              </button>
+              <div class="demotivator-content" style="display: none; padding: 0 1.25rem 1.25rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.02); padding-top: 0.75rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>The Pitfall:</strong> A drop in mock test score makes you feel like you aren't improving, leading to study avoidance.</p>
+                <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+                  <strong style="color: var(--text-primary); font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">🔧 Action: Diagnostic Mistake Logger</strong>
+                  <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                    <input type="text" id="mock-err-topic" placeholder="e.g. Rotation mechanics Q4" style="flex-grow: 1; background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: 4px; padding: 0.35rem 0.6rem; color: white; font-size: 0.78rem;">
+                    <select id="mock-err-cause" style="background: var(--bg-tertiary); border: 1px solid var(--card-border); border-radius: 4px; padding: 0.35rem 0.6rem; color: white; font-size: 0.78rem;">
+                      <option value="Concept Gap">Concept Gap</option>
+                      <option value="Calculation Slip">Calculation Slip</option>
+                      <option value="Time Rush">Time Rush</option>
+                    </select>
+                    <button class="btn-primary" id="btn-add-mock-err" style="padding: 0.35rem 1rem; font-size: 0.78rem; border-radius: 4px;">Log Error</button>
+                  </div>
+                  <div id="mock-errors-list" style="max-height: 80px; overflow-y: auto; font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.25rem;">
+                    <!-- Dynamically logged errors -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 2: Backlog Paralysis -->
+            <div style="border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(255,255,255,0.015); overflow: hidden;">
+              <button class="demotivator-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 1rem 1.25rem; text-align: left; transition: var(--transition-fast);">
+                <span>2. Syllabus Backlog Paralysis 📚</span>
+                <span class="demotivator-arrow" style="font-size: 0.75rem; color: var(--text-muted);">▼ Expand</span>
+              </button>
+              <div class="demotivator-content" style="display: none; padding: 0 1.25rem 1.25rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.02); padding-top: 0.75rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>The Pitfall:</strong> Mass backlogs trigger anxiety, causing you to freeze and avoid opening books at all.</p>
+                <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+                  <strong style="color: var(--text-primary); font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">🔧 Action: 3 Tiny Wins Planner</strong>
+                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.5rem;">List 3 simple tasks for today. Checking them off builds dopamine to break the freeze.</p>
+                  <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <input type="checkbox" id="win-check-1">
+                      <input type="text" id="win-text-1" placeholder="e.g. Read 2 NCERT pages" style="flex-grow: 1; background: transparent; border: none; border-bottom: 1px solid var(--card-border); color: white; font-size: 0.78rem; outline: none;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <input type="checkbox" id="win-check-2">
+                      <input type="text" id="win-text-2" placeholder="e.g. Solve 5 physics MCQs" style="flex-grow: 1; background: transparent; border: none; border-bottom: 1px solid var(--card-border); color: white; font-size: 0.78rem; outline: none;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <input type="checkbox" id="win-check-3">
+                      <input type="text" id="win-text-3" placeholder="e.g. Review mistake notebook" style="flex-grow: 1; background: transparent; border: none; border-bottom: 1px solid var(--card-border); color: white; font-size: 0.78rem; outline: none;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 3: Peer Comparison -->
+            <div style="border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(255,255,255,0.015); overflow: hidden;">
+              <button class="demotivator-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 1rem 1.25rem; text-align: left; transition: var(--transition-fast);">
+                <span>3. Toxic Peer Comparison 👥</span>
+                <span class="demotivator-arrow" style="font-size: 0.75rem; color: var(--text-muted);">▼ Expand</span>
+              </button>
+              <div class="demotivator-content" style="display: none; padding: 0 1.25rem 1.25rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.02); padding-top: 0.75rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>The Pitfall:</strong> Hearing peers boast about study hours triggers impostor syndrome and anxiety.</p>
+                <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+                  <strong style="color: var(--text-primary); font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">🔧 Action: The Focus Boundary Oath</strong>
+                  <div style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.78rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                      <input type="checkbox" id="oath-check-1"> I will not ask friends "how much syllabus have you finished?" today.
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                      <input type="checkbox" id="oath-check-2"> I will close group chat discussions about exam paper predictions.
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 4: Family expectations -->
+            <div style="border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(255,255,255,0.015); overflow: hidden;">
+              <button class="demotivator-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 1rem 1.25rem; text-align: left; transition: var(--transition-fast);">
+                <span>4. Family Expectation Load 🏠</span>
+                <span class="demotivator-arrow" style="font-size: 0.75rem; color: var(--text-muted);">▼ Expand</span>
+              </button>
+              <div class="demotivator-content" style="display: none; padding: 0 1.25rem 1.25rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.02); padding-top: 0.75rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>The Pitfall:</strong> Feeling the burden of parent sacrifices makes study sessions feel like high-stakes emergencies.</p>
+                <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--card-border); text-align: center;">
+                  <strong style="color: var(--text-primary); font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">🔧 Action: The Quiet Venting Journal</strong>
+                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;">Dumping this worry onto your private journal removes it from your mental loop.</p>
+                  <button class="btn-primary" id="btn-action-go-journal" style="font-size: 0.78rem; padding: 0.4rem 1.2rem;">Open Journal Panel</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 5: Sleep neglect -->
+            <div style="border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(255,255,255,0.015); overflow: hidden;">
+              <button class="demotivator-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 1rem 1.25rem; text-align: left; transition: var(--transition-fast);">
+                <span>5. Sleep Neglect & Brain Fog 🌙</span>
+                <span class="demotivator-arrow" style="font-size: 0.75rem; color: var(--text-muted);">▼ Expand</span>
+              </button>
+              <div class="demotivator-content" style="display: none; padding: 0 1.25rem 1.25rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.02); padding-top: 0.75rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>The Pitfall:</strong> Cutting sleep triggers fog, making revision slow and extremely frustrating.</p>
+                <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--card-border); text-align: center;">
+                  <strong style="color: var(--text-primary); font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">🔧 Action: Sleep Wind-down Soundscape</strong>
+                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;">Block racing thoughts at bedtime with deep, relaxing Brownian static hum.</p>
+                  <button class="btn-primary" id="btn-action-sleep-hum" style="font-size: 0.78rem; padding: 0.4rem 1.2rem; background: var(--accent-cyan);">Play Sleep Hum</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 6: Fear of Exam Day Freeze -->
+            <div style="border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(255,255,255,0.015); overflow: hidden;">
+              <button class="demotivator-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 1rem 1.25rem; text-align: left; transition: var(--transition-fast);">
+                <span>6. Fear of Exam-Day Freeze 🔮</span>
+                <span class="demotivator-arrow" style="font-size: 0.75rem; color: var(--text-muted);">▼ Expand</span>
+              </button>
+              <div class="demotivator-content" style="display: none; padding: 0 1.25rem 1.25rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.02); padding-top: 0.75rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>The Pitfall:</strong> Worrying about freezing in the exam hall triggers active panic loops while trying to study.</p>
+                <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--card-border); text-align: center;">
+                  <strong style="color: var(--text-primary); font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">🔧 Action: Slow Breathing Trigger</strong>
+                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;">Slowing down your respiration resets your sympathetic panic loops instantly.</p>
+                  <button class="btn-primary" id="btn-action-sigh-breathe" style="font-size: 0.78rem; padding: 0.4rem 1.2rem; background: var(--accent-purple);">Open Breathing Guide</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 7: Monotonous Isolation -->
+            <div style="border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(255,255,255,0.015); overflow: hidden;">
+              <button class="demotivator-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 1rem 1.25rem; text-align: left; transition: var(--transition-fast);">
+                <span>7. Monotonous Isolation 🚪</span>
+                <span class="demotivator-arrow" style="font-size: 0.75rem; color: var(--text-muted);">▼ Expand</span>
+              </button>
+              <div class="demotivator-content" style="display: none; padding: 0 1.25rem 1.25rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.02); padding-top: 0.75rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>The Pitfall:</strong> Staying locked inside a room for days flatlines your dopamine, causing flat moods and depression.</p>
+                <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--card-border); text-align: center;">
+                  <strong style="color: var(--text-primary); font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">🔧 Action: The 15-Min Walk Alarm</strong>
+                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;">Clicking here schedules a daily counselor alarm to take a walk in natural daylight to reset brain synapses.</p>
+                  <button class="btn-primary" id="btn-action-set-walk" style="font-size: 0.78rem; padding: 0.4rem 1.2rem; background: var(--accent-emerald);">Set Walk Reminder</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 8: Physical fatigue -->
+            <div style="border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(255,255,255,0.015); overflow: hidden;">
+              <button class="demotivator-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 1rem 1.25rem; text-align: left; transition: var(--transition-fast);">
+                <span>8. Physical Fatigue & Energy Crashes 🔋</span>
+                <span class="demotivator-arrow" style="font-size: 0.75rem; color: var(--text-muted);">▼ Expand</span>
+              </button>
+              <div class="demotivator-content" style="display: none; padding: 0 1.25rem 1.25rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.02); padding-top: 0.75rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>The Pitfall:</strong> High caffeine levels and zero exercise lead to chronic physical exhaustion and brain crashes.</p>
+                <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+                  <strong style="color: var(--text-primary); font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">🔧 Action: The 3-Step Study Stretch Desk Card</strong>
+                  <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.78rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                      <input type="checkbox" id="stretch-check-1"> Neck Rolls: 5 times clockwise and counter-clockwise.
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                      <input type="checkbox" id="stretch-check-2"> Shoulder shrugs: pull shoulders to ears and drop.
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                      <input type="checkbox" id="stretch-check-3"> Torso twists: twist left/right while seated.
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 9: Phone loop guilt -->
+            <div style="border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(255,255,255,0.015); overflow: hidden;">
+              <button class="demotivator-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 1rem 1.25rem; text-align: left; transition: var(--transition-fast);">
+                <span>9. Phone Loop & Distraction Guilt 📱</span>
+                <span class="demotivator-arrow" style="font-size: 0.75rem; color: var(--text-muted);">▼ Expand</span>
+              </button>
+              <div class="demotivator-content" style="display: none; padding: 0 1.25rem 1.25rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.02); padding-top: 0.75rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>The Pitfall:</strong> Scrolling on your phone, followed by intense self-blame, triggers a demotivated 'sabotaging the day' response.</p>
+                <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--card-border); text-align: center;">
+                  <strong style="color: var(--text-primary); font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">🔧 Action: Melt Phone Guilt</strong>
+                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;">Use our Mind Melt tool to write down your phone guilt and watch it dissolve from your screen.</p>
+                  <button class="btn-primary" id="btn-action-go-vent" style="font-size: 0.78rem; padding: 0.4rem 1.2rem; background: var(--accent-rose);">Open Mind Melt Box</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 10: Lack of instant feedback -->
+            <div style="border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(255,255,255,0.015); overflow: hidden;">
+              <button class="demotivator-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 700; color: var(--text-primary); cursor: pointer; padding: 1rem 1.25rem; text-align: left; transition: var(--transition-fast);">
+                <span>10. Lack of Instant Progress Feedback 🎯</span>
+                <span class="demotivator-arrow" style="font-size: 0.75rem; color: var(--text-muted);">▼ Expand</span>
+              </button>
+              <div class="demotivator-content" style="display: none; padding: 0 1.25rem 1.25rem 1.25rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.02); padding-top: 0.75rem;">
+                <p style="margin-bottom: 0.75rem;"><strong>The Pitfall:</strong> Studying abstract concepts for months without seeing scores jump makes you feel stuck.</p>
+                <div style="background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--card-border); text-align: center;">
+                  <strong style="color: var(--text-primary); font-size: 0.8rem; display: block; margin-bottom: 0.5rem;">🔧 Action: Progress Streak Checker</strong>
+                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;">Consistency is your primary progress metric. Expand the Daily Reset drawer to view your active logs streak.</p>
+                  <button class="btn-primary" id="btn-action-go-streak" style="font-size: 0.78rem; padding: 0.4rem 1.2rem; background: var(--accent-purple);">Open Streak Drawer</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          
+          <!-- VIBE CHECK GAME CARD -->
+          <div style="background: rgba(139, 92, 246, 0.05); border: 1px dashed var(--accent-purple); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; margin-top: 2rem;">
+            <h3 style="color: var(--accent-purple); font-size: 1.2rem; margin-bottom: 0.5rem;">🧠 Vibe Check Mini-Game</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">Answer 1 question to instantly decode your hidden mental state and get a quick fix.</p>
+            <button class="btn-primary" id="btn-start-game" style="background: var(--accent-purple); font-weight: 700; border: none; padding: 0.6rem 1.25rem; border-radius: 20px; color: white; cursor: pointer;">Play Quick Game</button>
+          </div>
+          
+        </div>
+
+        <!-- Privacy Shield Section -->
+        <div class="glass-card" style="margin-top: 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(22, 18, 46, 0.45)); border-color: rgba(16, 185, 129, 0.2);">
+          <div class="care-section-title" style="border-bottom-color: rgba(16, 185, 129, 0.15); color: #a7f3d0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Your MindFlow Data Shield & Privacy Settings
+          </div>
+          <div class="grid-2-1" style="margin-bottom: 0; align-items: center; gap: 2rem;">
+            <div>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem;">
+                We believe your mental health reflections should remain completely private. MindFlow is engineered with a <strong>Zero-Server Architecture</strong>:
+              </p>
+              <ul style="font-size: 0.82rem; color: var(--text-secondary); list-style: none; display: flex; flex-direction: column; gap: 0.65rem; padding-left: 0; margin-bottom: 1rem;">
+                <li>🛡️ <strong>No Cloud Syncing</strong>: All of your logs, journals, and exam selections are saved only in your local browser's storage (<code style="background: rgba(0,0,0,0.2); padding: 0.1rem 0.3rem; border-radius: 4px;">localStorage</code>). No cloud servers, no analytics databases, and no external AI endpoints can ever view what you write.</li>
+                <li>🛡️ <strong>100% Offline Capability</strong>: All calculations, journal analyses, sounds, and visual guides occur locally on your processor inside your web browser.</li>
+                <li>🛡️ <strong>Absolute Control</strong>: You have total ownership of your records. You can purge the local storage data at any time.</li>
+              </ul>
+
+              <div style="margin-top: 1.25rem; background: rgba(139, 92, 246, 0.04); border: 1px solid rgba(139, 92, 246, 0.15); border-radius: var(--radius-md); padding: 1rem;">
+                <label for="gemini-key-input" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.4rem;">
+                  ✨ Connect Google Gemini API
+                </label>
+                <p style="font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.75rem; line-height: 1.4;">
+                  Unlock high-fidelity personalized AI reflections. Stored locally, queried directly to Google endpoints.
+                </p>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="password" id="gemini-key-input" placeholder="Enter Gemini API Key..." style="flex-grow: 1; background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); border-radius: 6px; padding: 0.4rem 0.75rem; color: white; font-size: 0.78rem; font-family: monospace; outline: none;">
+                  <button class="btn-primary" id="btn-save-gemini-key" style="padding: 0.4rem 1.1rem; font-size: 0.78rem; border-radius: 6px; background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan)); font-weight: 700; border: none; color: white; cursor: pointer;">Save</button>
+                </div>
+                <div id="gemini-status-label" style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.4rem;">
+                  Not connected (falling back to Local Sentiment Engine)
+                </div>
+              </div>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.01); border: 1px dashed var(--card-border); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; align-items: center; text-align: center;">
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Danger Zone</span>
+              <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.3; margin-bottom: 0.5rem;">Delete data or change the logged-in student profile on this device.</p>
+              <button class="btn-secondary" id="btn-logout" style="width: 100%; border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.02); font-weight: 700; color: var(--text-primary); cursor: pointer;">Change Profile / Logout</button>
+              <button class="btn-emergency-call" id="btn-wipe-data" style="background: var(--accent-rose); width: 100%;">Purge All My Data</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Counselor Admin Alert Inbox Card (Simulator) -->
+        <div class="glass-card" style="margin-top: 1.5rem; border-color: rgba(244, 63, 94, 0.25); background: linear-gradient(135deg, rgba(244, 63, 94, 0.05), rgba(22, 18, 46, 0.45));" id="counselor-inbox-card">
+          <div class="care-section-title" style="border-bottom-color: rgba(244, 63, 94, 0.15); color: #fca5a5;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-rose); animation: pulseRed 1.5s infinite; margin-right: 0.5rem;" id="counselor-inbox-dot"></span>
+            Counselor Admin Command Console (Alert Log Simulator)
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;">
+            <strong>Prototype Security Control:</strong> If a student writes anything indicating severe self-harm or suicidal thoughts in their journal, an encrypted crisis dispatch alarm triggers instantly to alert the counselor team. Simulate this by typing <em>"I want to kill myself"</em> or <em>"end my life"</em> in the journal.
+          </p>
+          <div style="background: rgba(0, 0, 0, 0.2); border-radius: var(--radius-md); border: 1px solid var(--card-border); padding: 1rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+              <span>TIMESTAMP</span>
+              <span>TRIGGER TERM</span>
+              <span>EXAM TARGET</span>
+              <span>ALERT DEPLOYMENT STATUS</span>
+            </div>
+            <div id="admin-alert-log-container" style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem; max-height: 150px; overflow-y: auto;">
+              <div style="text-align: center; color: var(--text-muted); padding: 1.5rem 0;" id="no-admin-alerts-placeholder">
+                No urgent self-harm alerts triggered. The console is quiet.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 1: CRISIS DIRECTORY MODAL
+       ========================================================================== -->
+  <div class="modal-overlay" id="crisis-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h4 class="modal-title">Student Support Helplines</h4>
+        <button class="btn-close" id="btn-crisis-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
+          If exam stress feels completely unbearable, please reach out. You don't have to carry this alone. These helplines provide free, confidential counseling:
+        </p>
+
+        <div class="crisis-list">
+          <div class="crisis-card">
+            <div class="crisis-info">
+              <h5>Tele MANAS (Govt of India)</h5>
+              <p>24/7 National Mental Health Helpline</p>
+            </div>
+            <a href="tel:14416" class="crisis-call-btn">
+              📞 14416
+            </a>
+          </div>
+
+          <div class="crisis-card">
+            <div class="crisis-info">
+              <h5>Vandrevala Foundation</h5>
+              <p>24/7 crisis support and suicide prevention</p>
+            </div>
+            <a href="tel:9999666555" class="crisis-call-btn">
+              📞 9999666555
+            </a>
+          </div>
+
+          <div class="crisis-card">
+            <div class="crisis-info">
+              <h5>Kiran Helpline</h5>
+              <p>Government mental health support portal</p>
+            </div>
+            <a href="tel:18005990019" class="crisis-call-btn">
+              📞 1800-599-0019
+            </a>
+          </div>
+
+          <div class="crisis-card">
+            <div class="crisis-info">
+              <h5>Sneha India</h5>
+              <p>Dedicated distress support lines</p>
+            </div>
+            <a href="tel:04424640050" class="crisis-call-btn">
+              📞 044-24640050
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 2: PANIC RELIEF KIT MODAL
+       ========================================================================== -->
+  <div class="modal-overlay" id="panic-modal">
+    <div class="modal" style="max-width: 580px;">
+      <div class="modal-header">
+        <h4 class="modal-title">Result-Day Stress Buster Kit</h4>
+        <button class="btn-close" id="btn-panic-close">&times;</button>
+      </div>
+      <div class="modal-body" style="line-height: 1.6;">
+        <h4 style="color: var(--accent-rose); font-size: 1.1rem; margin-bottom: 0.5rem;">If you are feeling panicky or disappointed right now:</h4>
+        <ul style="padding-left: 1.25rem; font-size: 0.9rem; color: var(--text-primary); display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+          <li>🔒 <strong>Disconnect for a moment</strong>: Close the group chats and forums. Comparison immediately amplifies distress.</li>
+          <li>🌊 <strong>Use physiological sighs</strong>: Take two deep breaths in through your nose, then one long, slow sigh out through your mouth. Repeat 3 times.</li>
+          <li>🖼️ <strong>The 5-Year Frame</strong>: Ask yourself: "Will this specific rank or marks count in 5 years?" It feels like the end of the world now, but it's only a single redirection.</li>
+          <li>🗣️ <strong>Talk to a trusted friend or mentor</strong>: Let them know you're feeling down. Bottling up the sadness makes it expand.</li>
+        </ul>
+        <div style="background: rgba(244, 63, 94, 0.05); border: 1px solid rgba(244, 63, 94, 0.15); border-radius: var(--radius-md); padding: 1rem; font-size: 0.8rem; text-align: center; color: var(--text-secondary);">
+          Remember: Hundreds of thousands of highly successful professionals didn't clear their target exam on their first try, or got lower-than-expected boards. Career paths are complex and beautiful. You will build a great life.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 3: EMERGENCY INTERVENTION OVERLAY (SELF-HARM ALERT)
+       ========================================================================== -->
+  <div class="modal-overlay" id="crisis-alert-modal">
+    <div class="modal" style="max-width: 550px; border: 2px solid var(--accent-rose); background: #130a16;">
+      <div class="modal-header" style="background: rgba(244, 63, 94, 0.15); border-bottom-color: rgba(244, 63, 94, 0.25);">
+        <h4 class="modal-title" style="color: #fda4af; display: flex; align-items: center; gap: 0.5rem;">
+          ⚠️ Emergency Intervention Activated
+        </h4>
+        <button class="btn-close" id="btn-crisis-alert-close" style="color: #fda4af;">&times;</button>
+      </div>
+      <div class="modal-body" style="line-height: 1.6; padding: 1.75rem;">
+        <div style="font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">🌱</div>
+        <h4 style="color: #fca5a5; font-size: 1.25rem; text-align: center; margin-bottom: 0.75rem; font-weight: 800;">Please Pause. We are here with you.</h4>
+        <p style="font-size: 0.95rem; color: var(--text-primary); text-align: center; margin-bottom: 1.5rem;">
+          It sounds like you are carrying an overwhelmingly heavy burden right now. Please know that your life has immense value, and you do not have to walk this dark path alone. 
+        </p>
+
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+          <span style="font-size: 0.78rem; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 0.75rem; text-align: center;">Immediate Supportive Connections</span>
+          
+          <div class="crisis-list" style="gap: 0.75rem;">
+            <div class="crisis-card" style="background: rgba(244, 63, 94, 0.05); border-color: rgba(244, 63, 94, 0.15); padding: 0.75rem 1rem;">
+              <div class="crisis-info">
+                <h5 style="font-size: 0.92rem; color: #fda4af;">Tele MANAS Helpline</h5>
+                <p style="font-size: 0.75rem; color: var(--text-secondary);">Govt 24/7 National Counselor Support</p>
+              </div>
+              <a href="tel:14416" class="crisis-call-btn" style="background: var(--accent-rose); border-color: var(--accent-rose);">
+                📞 14416
+              </a>
+            </div>
+            
+            <div class="crisis-card" style="padding: 0.75rem 1rem; border: 1px solid var(--card-border);">
+              <div class="crisis-info">
+                <h5 style="font-size: 0.92rem;">Vandrevala Foundation</h5>
+                <p style="font-size: 0.75rem; color: var(--text-secondary);">24/7 Free Distress Call & Chat</p>
+              </div>
+              <a href="tel:9999666555" class="crisis-call-btn">
+                📞 9999666555
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 0.78rem; text-align: center; color: var(--text-muted); line-height: 1.4;">
+          <strong>🚨 Notification Sent to Admin Team:</strong> As part of our duty of care, an urgent counselor dispatch has been initiated. A student advisor or campus counselor will reach out to check on you shortly. We want to support you.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 4: PRACTICAL REMEDY MODAL
+       ========================================================================== -->
+  <div class="modal-overlay" id="remedy-modal">
+    <div class="modal" style="max-width: 580px;">
+      <div class="modal-header">
+        <h4 class="modal-title">Your Next Practical Step</h4>
+        <button class="btn-close" id="btn-remedy-close">&times;</button>
+      </div>
+      <div class="modal-body" style="line-height: 1.6;">
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1.2rem;" id="remedy-intro-text"></p>
+        <div style="background: rgba(45, 212, 191, 0.08); border: 1px solid rgba(45, 212, 191, 0.2); border-radius: var(--radius-md); padding: 1.25rem;">
+          <h4 style="color: var(--accent-cyan); font-size: 1.05rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>💡</span> Practical Solution
+          </h4>
+          <p id="remedy-solution-text" style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0;"></p>
+        </div>
+        <button class="btn-primary" id="btn-remedy-action" style="width: 100%; margin-top: 1.5rem; background: var(--bg-tertiary); border: 1px solid var(--card-border); padding: 0.75rem; border-radius: 6px; color: white; cursor: pointer; font-weight: 600; transition: background 0.2s;">Got it. Let's get back to work.</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 5: MOTIVATION REEL
+       ========================================================================== -->
+  <div class="modal-overlay" id="reel-modal">
+    <div class="modal" style="max-width: 400px; padding: 0; background: #000; height: 80vh; max-height: 700px; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; position: relative;">
+      <!-- Progress Bar -->
+      <div style="display: flex; gap: 4px; padding: 15px 10px; position: absolute; top: 0; left: 0; right: 0; z-index: 10;">
+         <div class="reel-progress"><div class="reel-progress-fill" id="reel-prog-0"></div></div>
+         <div class="reel-progress"><div class="reel-progress-fill" id="reel-prog-1"></div></div>
+         <div class="reel-progress"><div class="reel-progress-fill" id="reel-prog-2"></div></div>
+         <div class="reel-progress"><div class="reel-progress-fill" id="reel-prog-3"></div></div>
+      </div>
+      <button class="btn-close" id="btn-reel-close" style="position: absolute; top: 35px; right: 15px; z-index: 10; color: white; background: rgba(0,0,0,0.5); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">&times;</button>
+      
+      <div id="reel-content" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; text-align: center; background: linear-gradient(135deg, #2d3748, #1a202c); transition: background 0.3s;">
+         <div id="reel-emoji" style="font-size: 5rem; margin-bottom: 1.5rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));">😔</div>
+         <h3 id="reel-text" style="color: white; font-size: 1.4rem; line-height: 1.5; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Loading story...</h3>
+      </div>
+      
+      <!-- Click Zones -->
+      <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 40%; z-index: 5; cursor: pointer;" id="reel-prev"></div>
+      <div style="position: absolute; top: 0; bottom: 0; right: 0; width: 60%; z-index: 5; cursor: pointer;" id="reel-next"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 6: VIBE CHECK MINI-GAME
+       ========================================================================== -->
+  <div class="modal-overlay" id="game-modal">
+    <div class="modal" style="max-width: 500px; text-align: center;">
+      <div class="modal-header">
+        <h4 class="modal-title">Vibe Check</h4>
+        <button class="btn-close" id="btn-game-close">&times;</button>
+      </div>
+      <div class="modal-body" id="game-body">
+        <div id="game-question-container">
+          <p id="game-question" style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1.5rem;">Loading...</p>
+          <div id="game-options" style="display: grid; grid-template-columns: 1fr; gap: 0.75rem;">
+            <!-- Options dynamically injected -->
+          </div>
+        </div>
+        <div id="game-result-container" style="display: none;">
+          <div id="game-result-emoji" style="font-size: 3rem; margin-bottom: 1rem;"></div>
+          <h4 id="game-result-title" style="color: var(--accent-cyan); font-size: 1.2rem; margin-bottom: 0.5rem;"></h4>
+          <p id="game-result-desc" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5;"></p>
+          <button class="btn-primary" id="btn-game-done" style="margin-top: 1.5rem; width: 100%; border-radius: 6px; padding: 0.75rem; border: none; font-weight: 700; cursor: pointer;">Got it!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="state.js"></script>
+  <script src="init.js"></script>
+  <script src="api.js"></script>
+  <script src="ui.js"></script>
+  <script src="logging.js"></script>
+  <script src="charts.js"></script>
+  <script src="audio.js"></script>
+  <script src="breathing.js"></script>
+  <script src="security.js"></script>
+  <script src="demotivators.js"></script>
+  <script src="reel.js"></script>
+  <script src="game.js"></script>
+  <script src="events.js"></script>
+</body>
+</html>

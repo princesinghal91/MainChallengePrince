@@ -1,0 +1,240 @@
+{
+  "users": {
+    "1111111111": {
+      "name": "Aarav Sharma",
+      "phone": "1111111111",
+      "exam": "JEE"
+    },
+    "1234567890": {
+      "name": "prince",
+      "phone": "1234567890",
+      "exam": "JEE"
+    },
+    "2222222222": {
+      "name": "Priya Patel",
+      "phone": "2222222222",
+      "exam": "NEET"
+    },
+    "3333333333": {
+      "name": "Rohan Gupta",
+      "phone": "3333333333",
+      "exam": "UPSC"
+    },
+    "4444444444": {
+      "name": "Sneha Reddy",
+      "phone": "4444444444",
+      "exam": "CAT"
+    },
+    "5555555555": {
+      "name": "Aditya Singh",
+      "phone": "5555555555",
+      "exam": "GATE"
+    },
+    "6666666666": {
+      "name": "Kavya Verma",
+      "phone": "6666666666",
+      "exam": "Board"
+    },
+    "7777777777": {
+      "name": "Vikram Malhotra",
+      "phone": "7777777777",
+      "exam": "CUET"
+    },
+    "8888888888": {
+      "name": "Neha Joshi",
+      "phone": "8888888888",
+      "exam": "JEE"
+    },
+    "9999999999": {
+      "name": "Rahul Deshmukh",
+      "phone": "9999999999",
+      "exam": "NEET"
+    },
+    "0000000000": {
+      "name": "Crisis Test User",
+      "phone": "0000000000",
+      "exam": "UPSC"
+    }
+  },
+  "logs": {
+    "1111111111": [
+      {
+        "date": "2026-06-04T07:11:58.029Z",
+        "mood": "Stressed",
+        "triggers": [
+          "Mock Results"
+        ],
+        "journal": "Got 120/300. Feeling terrible."
+      },
+      {
+        "date": "2026-06-05T07:11:58.029Z",
+        "mood": "Calm",
+        "triggers": [],
+        "journal": "Studied physics. Better."
+      }
+    ],
+    "1234567890": [
+      {
+        "date": "2026-05-31T07:22:02.331Z",
+        "mood": "Calm",
+        "triggers": [
+          "Time Crunch"
+        ],
+        "journal": "Finished revising kinematics. Feeling reasonably steady."
+      },
+      {
+        "date": "2026-06-01T07:22:02.331Z",
+        "mood": "Stressed",
+        "triggers": [
+          "Mock Results",
+          "Syllabus Backlog"
+        ],
+        "journal": "Got a low score on chemistry mock test. Backlog feels huge and intimidating."
+      },
+      {
+        "date": "2026-06-02T07:22:02.331Z",
+        "mood": "Anxious",
+        "triggers": [
+          "Family Expectations"
+        ],
+        "journal": "Talked to parents about preparation. I know they mean well, but the expectation pressure is high."
+      }
+    ],
+    "2222222222": [
+      {
+        "date": "2026-06-05T07:11:58.029Z",
+        "mood": "Anxious",
+        "triggers": [
+          "Time Crunch"
+        ],
+        "journal": "Biology syllabus is endless."
+      }
+    ],
+    "3333333333": [
+      {
+        "date": "2026-06-03T07:11:58.029Z",
+        "mood": "Burnt-Out",
+        "triggers": [
+          "Sleep Deprived"
+        ],
+        "journal": "4 hours sleep. Can't read Laxmikanth."
+      },
+      {
+        "date": "2026-06-04T07:11:58.029Z",
+        "mood": "Joyful",
+        "triggers": [
+          "Physical Health"
+        ],
+        "journal": "Went for a run."
+      }
+    ],
+    "0000000000": [
+      {
+        "date": "2026-06-06T07:11:58.029Z",
+        "mood": "Burnt-Out",
+        "triggers": [
+          "Family Expectations"
+        ],
+        "journal": "I want to end it all. I can't take this anymore."
+      }
+    ],
+    "4444444444": [
+      {
+        "date": "2026-06-05T07:11:58.029Z",
+        "mood": "Calm",
+        "triggers": [
+          "Time Crunch"
+        ],
+        "journal": "Regular study day."
+      }
+    ],
+    "5555555555": [
+      {
+        "date": "2026-06-05T07:11:58.029Z",
+        "mood": "Calm",
+        "triggers": [
+          "Time Crunch"
+        ],
+        "journal": "Regular study day."
+      }
+    ],
+    "6666666666": [
+      {
+        "date": "2026-06-05T07:11:58.029Z",
+        "mood": "Calm",
+        "triggers": [
+          "Time Crunch"
+        ],
+        "journal": "Regular study day."
+      }
+    ],
+    "7777777777": [
+      {
+        "date": "2026-06-05T07:11:58.029Z",
+        "mood": "Calm",
+        "triggers": [
+          "Time Crunch"
+        ],
+        "journal": "Regular study day."
+      }
+    ],
+    "8888888888": [
+      {
+        "date": "2026-06-05T07:11:58.029Z",
+        "mood": "Calm",
+        "triggers": [
+          "Time Crunch"
+        ],
+        "journal": "Regular study day."
+      }
+    ],
+    "9999999999": [
+      {
+        "date": "2026-06-05T07:11:58.029Z",
+        "mood": "Calm",
+        "triggers": [
+          "Time Crunch"
+        ],
+        "journal": "Regular study day."
+      }
+    ]
+  },
+  "errors": {
+    "1111111111": [
+      {
+        "topic": "Rotational Dynamics Q4",
+        "cause": "Calculation Error",
+        "checked": false
+      },
+      {
+        "topic": "Integration by parts",
+        "cause": "Concept Gap",
+        "checked": true
+      }
+    ]
+  },
+  "wins": {
+    "2222222222": [
+      "Completed Genetics Revision",
+      "Slept 8 hours"
+    ]
+  },
+  "oaths": {
+    "3333333333": [
+      "I will not look at my phone for the first 2 hours of study"
+    ]
+  },
+  "stretches": {
+    "4444444444": [
+      "Started solving DILR sets without looking at solutions immediately"
+    ]
+  },
+  "adminAlerts": [
+    {
+      "timestamp": "2026-06-06T07:11:58.029Z",
+      "studentId": "0000000000",
+      "examTarget": "UPSC",
+      "triggerKeyword": "end it all"
+    }
+  ]
+}

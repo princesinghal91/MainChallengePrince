@@ -1,0 +1,10 @@
+{
+  "name": "aap-zaroori-ho",
+  "version": "1.0.0",
+  "description": "Aap Zaroori Ho - Student Well-being Companion",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
